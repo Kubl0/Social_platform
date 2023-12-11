@@ -4,13 +4,13 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Formik, Field, Form, FormikHelpers } from 'formik';
-import '@/app/register/styles.css';
+import '@/app/auth/register/styles.css';
 import * as Yup from 'yup';
 import { addUser } from '@/app/components/actions';
 import { Values } from '@/app/components/actions';
 import { useState } from 'react';
 
-export default function Register() {
+export default function Page() {
     const [message, setMessage] = useState({ type: '', content: '' });
 
     const validate = Yup.object({
@@ -44,7 +44,7 @@ export default function Register() {
                 onSubmit={(values: Values, { setSubmitting }: FormikHelpers<Values>) => {
                     addUser(values)
                         .then((res) => {
-                            setMessage({ type: 'success', content: String(res.message) });
+                            setMessage({ type: res.type, content: String(res.message) });
                             setTimeout(() => {
                                 window.location.href = '/login';
                             }
@@ -132,7 +132,7 @@ export default function Register() {
                         <div className="flex flex-col text-center text-gray-500 text-sm justify-center items-center">
                             <p className="mb-2">Already have an account?</p>
                             <Link
-                                href={'/login'}
+                                href={'/auth/login'}
                                 className="center-group relative flex w-[200px] justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                             >
                                 Back to login

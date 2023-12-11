@@ -1,21 +1,29 @@
-import type { Metadata } from 'next'
+
 import './globals.css'
-import React from "react";
+import React, {ReactNode} from "react";
 import Navbar from "@/app/components/Navbar";
+import {getServerSession} from "next-auth";
+import {Metadata} from "next";
+import SessionProvider from "@/app/components/SessionProvider";
+
 
 
 export const metadata: Metadata = {
-  title: 'SocialHub',
-  description: '',
+    title: 'SocialHub',
+    description: '',
 }
 
-export default function RootLayout({children}: {children: React.ReactNode}) {
-  return (
-    <html lang="pl">
-      <body>
-        <Navbar />
-        {children}
-      </body>
-    </html>
-  )
+export default async function RootLayout({children}: { children: ReactNode }) {
+    const session = await getServerSession();
+
+    return (
+        <html lang="en">
+        <body>
+        <SessionProvider session={session}>
+            <Navbar/>
+            {children}
+        </SessionProvider>
+        </body>
+        </html>
+    )
 }

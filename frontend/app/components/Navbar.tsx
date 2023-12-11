@@ -1,7 +1,10 @@
 // components/Navbar.tsx
+'use client'
 import Link from 'next/link';
+import {signIn, signOut, useSession} from "next-auth/react";
 
 export default function Navbar() {
+    const {data: session} = useSession();
     return (
         <div className="flex justify-between items-center bg-gray-800 pb-2.5 pr-2.5 pl-2.5">
             <div className="flex items-center">
@@ -18,13 +21,33 @@ export default function Navbar() {
                 </Link>
             </div>
 
+
             <div className="flex items-center">
-                <Link href={"/login"}>
-                    <button className="bg-gray-700 text-white px-3 h-8 mt-2 rounded-md text-sm font-medium">
+                {session ? (
+                    <div className="flex items-center">
+                        <div className="flex items-center">
+                            <Link href={"/profile"}>
+                                <button className="bg-gray-700 text-white px-3 h-8 mt-2 rounded-md text-sm font-medium mr-3">
+                                    Profile
+                                </button>
+                            </Link>
+                        </div>
+                    <button className="bg-gray-700 text-white px-3 h-8 mt-2 rounded-md text-sm font-medium mr-3"
+                            onClick={() => signOut()}>
+                        Logout
+                    </button>
+                    </div>
+                ) : (
+
+                    <button className="bg-gray-700 text-white px-3 h-8 mt-2 rounded-md text-sm font-medium"
+                            onClick={() => signIn()}>
                         Login
                     </button>
-                </Link>
+                )}
+
             </div>
+
         </div>
-    );
+    )
 }
+

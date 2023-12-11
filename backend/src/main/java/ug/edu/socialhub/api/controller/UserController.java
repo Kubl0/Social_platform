@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ug.edu.socialhub.api.models.User;
 import ug.edu.socialhub.api.service.UserService;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -26,6 +27,11 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<String> addUser(@RequestBody User user) {
         return userService.addUser(user);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> loginUser(@RequestBody User user) {
+        return userService.loginUser(user);
     }
 
 
