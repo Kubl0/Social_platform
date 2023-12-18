@@ -3,6 +3,7 @@ package ug.edu.socialhub.api.service;
 import ug.edu.socialhub.api.models.User;
 
 public class LoginResponse {
+    private final String userId;
     private String message;
     private User user;
 
@@ -34,11 +35,12 @@ public class LoginResponse {
 
     private boolean success;
 
-    public LoginResponse(String message, User user, String accessToken, boolean success) {
+    public LoginResponse(String message, User user, String accessToken, boolean success, String userId) {
         this.message = message;
         this.user = user;
         this.accessToken = accessToken;
         this.success = success;
+        this.userId = user.getId();
     }
 
     public boolean isSuccess() {

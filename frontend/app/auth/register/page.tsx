@@ -46,7 +46,7 @@ export default function Page() {
                         .then((res) => {
                             setMessage({ type: res.type, content: String(res.message) });
                             setTimeout(() => {
-                                window.location.href = '/login';
+                                window.location.href = '/auth/login';
                             }
                             , 5000);
                         })

@@ -1,4 +1,3 @@
-
 import './globals.css'
 import React, {ReactNode} from "react";
 import Navbar from "@/app/components/Navbar";

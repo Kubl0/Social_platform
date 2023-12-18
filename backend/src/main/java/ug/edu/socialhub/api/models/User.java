@@ -53,4 +53,8 @@ public class User {
         str += "Name: " + this.username + "\n";
         return str;
     }
+
+    public String getId() {
+        return this.id;
+    }
 }

@@ -50,17 +50,17 @@ public class UserService {
         try {
             List<User> users = userRepository.findByUsername(user.getUsername());
             if (users.isEmpty()) {
-                return new ResponseEntity<>(new LoginResponse("User login failed", null, null, false), HttpStatus.UNAUTHORIZED);
+                return new ResponseEntity<>(new LoginResponse("User login failed", null, null, false, null), HttpStatus.UNAUTHORIZED);
             }
             User foundUser = users.get(0);
 
             if (passwordEncoder.matches(user.getPassword(), foundUser.getPassword())) {
-                return ResponseEntity.ok().body(new LoginResponse("User logged in successfully", foundUser, generateJwtToken(foundUser), true));
+                return ResponseEntity.ok().body(new LoginResponse("User logged in successfully", foundUser, generateJwtToken(foundUser), true, foundUser.getId()));
             } else {
-                return new ResponseEntity<>(new LoginResponse("User login failed", null, null, false), HttpStatus.UNAUTHORIZED);
+                return new ResponseEntity<>(new LoginResponse("User login failed", null, null, false, null), HttpStatus.UNAUTHORIZED);
             }
         } catch (Exception e) {
-            return new ResponseEntity<>(new LoginResponse("User login failed", null, null, false), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new LoginResponse("User login failed", null, null, false, null), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
