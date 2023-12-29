@@ -15,11 +15,15 @@ export default function Navbar() {
                     </button>
                 </Link>
 
-                <Link href="/">
+                <Link href={'/test_page'}>
                     <button className="bg-gray-700 text-white px-3 h-8 mt-2 rounded-md text-sm font-medium mr-3">
                         Any Page
                     </button>
                 </Link>
+            </div>
+
+            <div>
+                <p></p>
             </div>
 
 

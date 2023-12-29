@@ -12,6 +12,29 @@ public class User {
     private String password;
     private String username;
 
+    private String profilePicture;
+    private String description;
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getProfilePicture() {
+        return profilePicture;
+    }
+
+    public void setProfilePicture(String profilePicture) {
+        this.profilePicture = profilePicture;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public User() {
     }
 
