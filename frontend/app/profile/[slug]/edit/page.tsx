@@ -13,7 +13,7 @@ interface EditUser {
     email: string;
 }
 
-async function updateUser(slug: string, userData: EditUser, session: Session | null): Promise<Response> {
+async function updateUser(slug: string, userData: EditUser, session: Session): Promise<Response> {
     if (!session?.accessToken) {
         throw new Error('Not authenticated');
     }
@@ -70,7 +70,7 @@ export default function EditProfilePage({params}: { params: { slug: string } }) 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        const res = await updateUser(slug, editedUser, session).then(r => r);
+        const res = await updateUser(slug, editedUser, session as Session).then(r => r);
         if (res.ok) {
             alert("User updated successfully!")
             setTimeout(() => {
@@ -84,7 +84,7 @@ export default function EditProfilePage({params}: { params: { slug: string } }) 
 
     return (
         <>
-            {session?.user.id === params.slug ? (
+            {session?.user?.id === params.slug ? (
             <div className="px-6 mt-40">
                 <div className="flex flex-wrap justify-center">
                     <div

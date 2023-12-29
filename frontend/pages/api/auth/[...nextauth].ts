@@ -3,10 +3,6 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import omit from 'lodash.omit';
 import { User } from "next-auth";
 
-interface MySession extends DefaultSession {
-    user?: User;
-    accessToken?: string;
-}
 
 export const authOptions: NextAuthOptions = {
     providers: [
