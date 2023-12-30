@@ -8,7 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import ug.edu.socialhub.api.models.FoundUser;
+import ug.edu.socialhub.api.models.Post;
 import ug.edu.socialhub.api.models.User;
+import ug.edu.socialhub.api.repository.PostRepository;
 import ug.edu.socialhub.api.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,17 +23,19 @@ import java.util.Optional;
 
 
 @Service
-public class UserService {
+public class ApiService {
 
     @Value("${jwt.secret}")
     private String secret;
     private final UserRepository userRepository;
+    private final PostRepository postRepository;
     private final PasswordEncoder passwordEncoder;
 
     private static final Key SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
-    public UserService(UserRepository userRepository) {
+    public ApiService(UserRepository userRepository, PostRepository postRepository) {
         this.userRepository = userRepository;
+        this.postRepository = postRepository;
         this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
@@ -48,6 +52,14 @@ public class UserService {
 
     public ResponseEntity<String> addUser(User user) {
         try {
+            List<User> users = userRepository.findByUsername(user.getUsername());
+            if (!users.isEmpty()) {
+                return new ResponseEntity<>("Username already taken", HttpStatus.CONFLICT);
+            }
+            users = userRepository.findByEmail(user.getEmail());
+            if (!users.isEmpty()) {
+                return new ResponseEntity<>("Email already taken", HttpStatus.CONFLICT);
+            }
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             userRepository.save(user);
             return new ResponseEntity<>("User registered succesfully", HttpStatus.OK);
@@ -118,23 +130,16 @@ public class UserService {
                 return new ResponseEntity<>("User update failed", HttpStatus.NOT_FOUND);
             }
 
-
-            String token = extractToken(authorizationHeader);
-            String token_id = Jwts.parserBuilder()
-                    .setSigningKey(SECRET_KEY)
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody()
-                    .getSubject();
-
-            if(!token_id.equals(id)){
-                return new ResponseEntity<>("Not authorized", HttpStatus.UNAUTHORIZED);
+            if (isAuthorized(id, authorizationHeader)) {
+                return new ResponseEntity<>("User update failed", HttpStatus.UNAUTHORIZED);
             }
+
             User userToUpdate = foundUser.get();
             userToUpdate.setEmail(user.getEmail());
             userToUpdate.setUsername(user.getUsername());
             userToUpdate.setProfilePicture(user.getProfilePicture());
             userToUpdate.setDescription(user.getDescription());
+
             userRepository.save(userToUpdate);
             return new ResponseEntity<>("User updated succesfully", HttpStatus.OK);
         } catch (Exception e) {
@@ -151,6 +156,53 @@ public class UserService {
             throw new IllegalArgumentException("Invalid or missing JWT token");
         }
     }
+
+    public ResponseEntity<String> addPost(String id, Post post, String authorizationHeader) {
+        try {
+            Optional<User> postUser = userRepository.findById(id);
+            if (postUser.isEmpty()) {
+                return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+            }
+
+            User user = postUser.get();
+
+            if(isAuthorized(id, authorizationHeader)) {
+                return new ResponseEntity<>("User not authorized", HttpStatus.UNAUTHORIZED);
+            }
+
+            Post newPost = new Post();
+            newPost.setUserId(id);
+            newPost.setContent(post.getContent());
+            postRepository.save(newPost);
+
+            user.addPost(newPost);
+            userRepository.save(user);
+
+            return new ResponseEntity<>("Post added succesfully", HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>("Post add failed", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public boolean isAuthorized(String id, String authorizationHeader) {
+        String token = extractToken(authorizationHeader);
+        String token_id = Jwts.parserBuilder()
+                .setSigningKey(SECRET_KEY)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+
+        return !token_id.equals(id);
+    }
+
+    public List<Post> getPosts(String id) {
+        Optional<User> user = userRepository.findById(id);
+        return user.map(User::getPosts).orElse(null);
+    }
+
+
 }
 
 

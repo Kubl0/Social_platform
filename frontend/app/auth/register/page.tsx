@@ -45,10 +45,11 @@ export default function Page() {
                     addUser(values)
                         .then((res) => {
                             setMessage({ type: res.type, content: String(res.message) });
-                            setTimeout(() => {
-                                window.location.href = '/auth/login';
+                            if (res.type === 'success') {
+                                setTimeout(() => {
+                                    window.location.href = '/auth/login';
+                                }, 1000);
                             }
-                            , 5000);
                         })
                         .catch((error) => {
                             setMessage({ type: 'error', content: error.message });

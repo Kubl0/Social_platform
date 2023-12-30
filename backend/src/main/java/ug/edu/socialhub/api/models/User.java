@@ -3,6 +3,8 @@ package ug.edu.socialhub.api.models;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
+
 @Document("users")
 public class User {
 
@@ -15,9 +17,24 @@ public class User {
     private String profilePicture;
     private String description;
 
-    public void setId(String id) {
-        this.id = id;
+    private ArrayList<Post> posts;
+
+
+
+    public ArrayList<Post> getPosts() {
+        return posts;
     }
+
+    public void setPosts(ArrayList<Post> posts) {
+        this.posts = posts;
+    }
+
+    public void addPost(Post post) {
+        this.posts.add(post);
+        System.out.println("Added post to user");
+        System.out.println(posts);
+    }
+
 
     public String getProfilePicture() {
         return profilePicture;
@@ -36,12 +53,14 @@ public class User {
     }
 
     public User() {
+        this.posts = new ArrayList<>();
     }
 
     public User(String email, String password, String name) {
         this.email = email;
         this.password = password;
         this.username = name;
+        this.posts = new ArrayList<>();
     }
 
     public String getEmail() {
