@@ -1,33 +1,12 @@
-// EditProfilePage.tsx
-
 'use client';
 
 import React, {useEffect, useState} from 'react';
 import {useSession} from 'next-auth/react';
 import {Session} from "next-auth";
+import {EditUser, updateUser, getUserEditData} from "@/app/components/api";
 
-interface EditUser {
-    username: string;
-    profilePicture: string;
-    description: string;
-    email: string;
-}
 
-async function updateUser(slug: string, userData: EditUser, session: Session): Promise<Response> {
-    if (!session?.accessToken) {
-        throw new Error('Not authenticated');
-    }
-    return await fetch(`http://localhost:8080/api/users/update/${slug}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + session?.accessToken
-        },
-        body: JSON.stringify(userData),
-    });
-}
-
-export default function EditProfilePage({params}: { params: { slug: string } }) {
+export default function EditProfilePage({params}: Readonly<{ params: { slug: string } }>) {
     const {data: session} = useSession();
     const {slug} = params;
 
@@ -39,23 +18,7 @@ export default function EditProfilePage({params}: { params: { slug: string } }) 
     });
 
     useEffect(() => {
-        async function fetchData() {
-            try {
-                const response = await fetch(`http://localhost:8080/api/users/get/${slug}`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-
-                const user = await response.json();
-                setEditedUser(user);
-            } catch (error) {
-                console.error('Error fetching user:', error);
-            }
-        }
-
-        fetchData().then(r => r);
+        getUserEditData(setEditedUser, slug).then(r => r);
     }, [slug]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -78,7 +41,7 @@ export default function EditProfilePage({params}: { params: { slug: string } }) 
             }, 500);
         }
         else {
-            console.error('Error updating user:', res);
+            alert("User update failed!")
         }
     };
 

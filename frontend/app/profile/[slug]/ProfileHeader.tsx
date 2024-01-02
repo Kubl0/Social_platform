@@ -1,25 +1,8 @@
 // ProfileHeader.tsx
 import React from 'react';
 import Link from 'next/link';
-
-interface FoundUser {
-    username: string;
-    profilePicture: string;
-    description: string;
-    email: string;
-}
-
-interface Session {
-    user: {
-        id: string;
-    };
-}
-
-interface ProfileHeaderProps {
-    foundUser: FoundUser | null;
-    session: Session | null;
-    params: { slug: string };
-}
+import {ProfileHeaderProps} from "@/types/apiTypes";
+import Image from "next/image";
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({ foundUser, session, params }) => {
     return (
@@ -29,10 +12,10 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ foundUser, session, param
                     <div className="w-full flex justify-center">
                         <div className="relative">
                             <div className="mt-[-50px]">
-                                <img
-                                    alt={foundUser?.username || 'User profile picture'}
+                                <Image
+                                    alt={foundUser?.username ?? 'User profile picture'}
                                     src={
-                                        foundUser?.profilePicture ||
+                                        foundUser?.profilePicture ??
                                         'https://www.charitycomms.org.uk/wp-content/uploads/2019/02/placeholder-image-square.jpg'
                                     }
                                     className="shadow-xl rounded-full align-middle border-none mx-auto max-w-[200px]"
@@ -57,17 +40,9 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ foundUser, session, param
                             <div className="text-sm leading-normal mt-0 mb-2 text-slate-600 font-bold uppercase">
                                 <i className="fas fa-map-marker-alt mr-2 text-lg text-slate-700"></i> {foundUser?.email}
                             </div>
-                            <div className="mb-2 text-slate-600 mt-10">
-                                <i className="fas fa-briefcase mr-2 text-lg text-slate-700"></i>
-                                {foundUser?.description || 'No description provided.'}
-                            </div>
-                        </div>
-
-                        <div className="mt-10 py-10 border-t border-gray-300 text-center">
-                            <div className="flex flex-wrap justify-center">
-                                <div className="w-full lg:w-9/12 px-4">
-                                    <h4 className="text-2xl font-semibold leading-normal mb-2 text-slate-700">Posts</h4>
-                                </div>
+                            <div className="mb-2 text-slate-600 mt-10 pb-5">
+                                <i className="fas fa-briefcase mr-2 text-lg text-slate-700 mb"></i>
+                                {foundUser?.description ?? 'No description provided.'}
                             </div>
                         </div>
                     </div>

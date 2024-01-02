@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import ug.edu.socialhub.api.models.FoundUser;
 import ug.edu.socialhub.api.models.Post;
 import ug.edu.socialhub.api.models.User;
+import ug.edu.socialhub.api.models.Comment;
 import ug.edu.socialhub.api.repository.PostRepository;
 import ug.edu.socialhub.api.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -143,7 +144,6 @@ public class ApiService {
             userRepository.save(userToUpdate);
             return new ResponseEntity<>("User updated succesfully", HttpStatus.OK);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             return new ResponseEntity<>("User update failed", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -174,34 +174,66 @@ public class ApiService {
             newPost.setUserId(id);
             newPost.setContent(post.getContent());
             postRepository.save(newPost);
-
-            user.addPost(newPost);
+            user.addPost(newPost.getId());
             userRepository.save(user);
 
             return new ResponseEntity<>("Post added succesfully", HttpStatus.OK);
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>("Post add failed", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     public boolean isAuthorized(String id, String authorizationHeader) {
         String token = extractToken(authorizationHeader);
-        String token_id = Jwts.parserBuilder()
+        String tokenId = Jwts.parserBuilder()
                 .setSigningKey(SECRET_KEY)
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
 
-        return !token_id.equals(id);
+        return !tokenId.equals(id);
     }
 
     public List<Post> getPosts(String id) {
         Optional<User> user = userRepository.findById(id);
-        return user.map(User::getPosts).orElse(null);
+        return user.map(value -> postRepository.findAllById(value.getPosts())).orElse(null);
     }
 
+    public ResponseEntity<String> addComment(String id, String authorizationHeader, Comment comment) {
+        try {
+            Optional<User> postUser = userRepository.findById(comment.getUserId());
+            if (postUser.isEmpty()) {
+                return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+            }
+
+            User user = postUser.get();
+
+            if(isAuthorized(comment.getUserId(), authorizationHeader)) {
+                return new ResponseEntity<>("User not authorized", HttpStatus.UNAUTHORIZED);
+            }
+
+            Optional<Post> post = postRepository.findById(id);
+            if (post.isEmpty()) {
+                return new ResponseEntity<>("Post not found", HttpStatus.NOT_FOUND);
+            }
+
+            Post postToUpdate = post.get();
+            Comment newComment = new Comment(comment.getUserId(), comment.getContent());
+            postToUpdate.addComment(newComment);
+            postRepository.save(postToUpdate);
+
+            return new ResponseEntity<>("Comment added succesfully", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Comment add failed", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    public List<Comment> getComments(String id) {
+        Optional<Post> post = postRepository.findById(id);
+        return post.map(Post::getComments).orElse(null);
+    }
 
 }
 

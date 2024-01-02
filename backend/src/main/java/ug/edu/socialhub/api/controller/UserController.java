@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ug.edu.socialhub.api.models.Comment;
 import ug.edu.socialhub.api.models.Post;
 import ug.edu.socialhub.api.models.User;
 import ug.edu.socialhub.api.models.FoundUser;
@@ -67,6 +68,13 @@ public class UserController {
     }
 
 
+    @PostMapping("/addComment/{id}")
+    public ResponseEntity<String> addComment(@PathVariable String id, @RequestBody Comment comment, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+        return apiService.addComment(id, authorizationHeader, comment);
+    }
 
-
+    @GetMapping("/getComments/{id}")
+    public List<Comment> getComments(@PathVariable String id) {
+        return apiService.getComments(id);
+    }
 }

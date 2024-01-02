@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description: '',
 }
 
-export default async function RootLayout({children}: { children: ReactNode }) {
+export default async function RootLayout({children}: Readonly<{ children: ReactNode }>) {
     const session = await getServerSession();
 
     return (

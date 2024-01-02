@@ -17,22 +17,24 @@ public class User {
     private String profilePicture;
     private String description;
 
-    private ArrayList<Post> posts;
+    private ArrayList<String> posts;
 
 
 
-    public ArrayList<Post> getPosts() {
+    public ArrayList<String> getPosts() {
         return posts;
     }
 
-    public void setPosts(ArrayList<Post> posts) {
-        this.posts = posts;
+    public void setPosts(ArrayList<String> postsId) {
+        this.posts = postsId;
     }
 
-    public void addPost(Post post) {
-        this.posts.add(post);
-        System.out.println("Added post to user");
-        System.out.println(posts);
+    public void addPost(String postId) {
+        this.posts.add(postId);
+    }
+
+    public String setID(String id) {
+        return this.id = id;
     }
 
 

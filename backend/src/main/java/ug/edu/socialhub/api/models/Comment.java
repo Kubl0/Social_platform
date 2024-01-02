@@ -1,25 +1,27 @@
 package ug.edu.socialhub.api.models;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document("comments")
+import java.util.UUID;
+
 public class Comment {
+
     @Id
     private String id;
     private String userId;
-    private String postId;
     private String content;
     private String date;
 
     public Comment() {
+        this.id = UUID.randomUUID().toString();
+        this.date = String.valueOf(System.currentTimeMillis());
     }
 
-    public Comment(String userId, String postId, String content, String date) {
+    public Comment(String userId, String content) {
+        this.id = UUID.randomUUID().toString();
         this.userId = userId;
-        this.postId = postId;
         this.content = content;
-        this.date = date;
+        this.date = String.valueOf(System.currentTimeMillis());
     }
 
     public String getId() {
@@ -30,9 +32,6 @@ public class Comment {
         return userId;
     }
 
-    public String getPostId() {
-        return postId;
-    }
 
     public String getContent() {
         return content;
@@ -50,9 +49,6 @@ public class Comment {
         this.userId = userId;
     }
 
-    public void setPostId(String postId) {
-        this.postId = postId;
-    }
 
     public void setContent(String content) {
         this.content = content;
@@ -67,7 +63,6 @@ public class Comment {
         return "Comment{" +
                 "id='" + id + '\'' +
                 ", userId='" + userId + '\'' +
-                ", postId='" + postId + '\'' +
                 ", content='" + content + '\'' +
                 ", date='" + date + '\'' +
                 '}';

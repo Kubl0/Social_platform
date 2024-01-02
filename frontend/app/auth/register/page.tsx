@@ -6,8 +6,8 @@ import { motion } from 'framer-motion';
 import { Formik, Field, Form, FormikHelpers } from 'formik';
 import '@/app/auth/register/styles.css';
 import * as Yup from 'yup';
-import { addUser } from '@/app/components/actions';
-import { Values } from '@/app/components/actions';
+import { addUser } from '@/app/components/api';
+import { Values } from '@/types/apiTypes';
 import { useState } from 'react';
 
 export default function Page() {
@@ -112,7 +112,7 @@ export default function Page() {
                             type="submit"
                             className="group relative flex w-[451px] justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                         >
-                            <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+                            <div className="absolute inset-y-0 left-0 flex items-center pl-3">
                                 <svg
                                     className="h-5 w-5 text-indigo-500 group-hover:text-indigo-400"
                                     xmlns="http://www.w3.org/2000/svg"
@@ -126,7 +126,7 @@ export default function Page() {
                                         clipRule="evenodd"
                                     />
                                 </svg>
-                            </span>
+                            </div>
                             Register
                         </button>
 

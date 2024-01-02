@@ -4,65 +4,9 @@ import React, {useEffect, useState} from 'react';
 import {useSession} from 'next-auth/react';
 import ProfileHeader from './ProfileHeader';
 import PostSection from './PostSection';
+import {getPosts, getUser} from "@/app/components/api";
+import {FoundUser, Post} from "@/types/apiTypes";
 
-interface FoundUser {
-    username: string;
-    profilePicture: string;
-    description: string;
-    email: string;
-}
-
-interface Post {
-    id: string;
-    content: string;
-    date: string;
-    userId: string;
-    likes: Array<string>;
-    comments: Array<Comment>;
-}
-
-interface Comment {
-    id: string;
-    userId: string;
-    postId: string;
-    content: string;
-    date: string;
-}
-
-async function getUser(slug: string): Promise<FoundUser> {
-    const response = await fetch(`http://localhost:8080/api/users/get/${slug}`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    });
-
-    if (!response.ok) {
-        throw new Error('Error fetching user data');
-    }
-
-    return response.json();
-}
-
-async function getPosts(slug: string): Promise<Post[]> {
-    const response = await fetch(`http://localhost:8080/api/users/getPosts/${slug}`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    });
-
-    if (!response.ok) {
-        throw new Error('Error fetching user data');
-    }
-
-    const posts = await response.json();
-
-    return posts.map((post: any) => ({
-        ...post,
-        date: new Date(Number(post.date)).toLocaleDateString(),
-    }));
-}
 
 const ProfilePage: React.FC<{ params: { slug: string } }> = ({ params }) => {
     const { data: session } = useSession();
@@ -76,8 +20,8 @@ const ProfilePage: React.FC<{ params: { slug: string } }> = ({ params }) => {
             try {
                 const user = await getUser(slug);
                 setFoundUser(user);
-                const posts = await getPosts(slug);
-                setPosts(posts);
+                const fetchedPosts = await getPosts(slug);
+                setPosts(fetchedPosts);
             } catch (error) {
                 console.error('Error fetching user:', error);
             }
