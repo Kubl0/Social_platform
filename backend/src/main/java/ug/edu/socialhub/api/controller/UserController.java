@@ -5,10 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ug.edu.socialhub.api.models.Comment;
-import ug.edu.socialhub.api.models.Post;
-import ug.edu.socialhub.api.models.User;
-import ug.edu.socialhub.api.models.FoundUser;
+import ug.edu.socialhub.api.models.*;
 import ug.edu.socialhub.api.service.ApiService;
 
 import java.util.List;
@@ -76,5 +73,25 @@ public class UserController {
     @GetMapping("/getComments/{id}")
     public List<Comment> getComments(@PathVariable String id) {
         return apiService.getComments(id);
+    }
+
+    @PostMapping("/addFriendRequest/{id}")
+    public ResponseEntity<String> addFriendRequest(@PathVariable String id, @RequestBody String username, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+        return apiService.addFriendRequest(id, username, authorizationHeader);
+    }
+
+    @GetMapping("/getFriendRequests/{id}")
+    public List<FriendRequest> getFriendRequests(@PathVariable String id) {
+        return apiService.getFriendRequests(id);
+    }
+
+    @PutMapping("/acceptFriendRequest/{id}")
+    public ResponseEntity<String> acceptFriendRequest(@PathVariable String id, @RequestBody String reqId, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+        return apiService.acceptFriendRequest(id, reqId, authorizationHeader);
+    }
+
+    @DeleteMapping("/deleteFriendRequest/{id}")
+    public ResponseEntity<String> deleteFriendRequest(@PathVariable String id, @RequestBody String reqId, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+        return apiService.deleteFriendRequest(id, reqId, authorizationHeader);
     }
 }

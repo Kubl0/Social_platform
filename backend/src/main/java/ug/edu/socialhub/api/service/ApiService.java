@@ -7,10 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import ug.edu.socialhub.api.models.FoundUser;
-import ug.edu.socialhub.api.models.Post;
-import ug.edu.socialhub.api.models.User;
-import ug.edu.socialhub.api.models.Comment;
+import ug.edu.socialhub.api.models.*;
 import ug.edu.socialhub.api.repository.PostRepository;
 import ug.edu.socialhub.api.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -44,7 +41,7 @@ public class ApiService {
         List<User> users = userRepository.findAll();
         List<FoundUser> foundUsers = new java.util.ArrayList<>();
         for (User user : users) {
-            FoundUser foundUser = new FoundUser(user.getEmail(), user.getUsername(), user.getProfilePicture(), user.getDescription(), user.getId());
+            FoundUser foundUser = new FoundUser(user.getEmail(), user.getUsername(), user.getProfilePicture(), user.getDescription(), user.getId(), user.getFriendsList());
             foundUsers.add(foundUser);
         }
         return foundUsers;
@@ -120,7 +117,7 @@ public class ApiService {
 
     public FoundUser getUserById(String id) {
         Optional<User> user = userRepository.findById(id);
-        return user.map(value -> new FoundUser(value.getEmail(), value.getUsername(), value.getProfilePicture(), value.getDescription(), value.getId())).orElse(null);
+        return user.map(value -> new FoundUser(value.getEmail(), value.getUsername(), value.getProfilePicture(), value.getDescription(), value.getId(), value.getFriendsList())).orElse(null);
     }
 
 
@@ -235,6 +232,105 @@ public class ApiService {
         return post.map(Post::getComments).orElse(null);
     }
 
+    public ResponseEntity<String> addFriendRequest(String id, String username, String authorizationHeader) {
+        try {
+            Optional<User> user = userRepository.findById(id);
+            if (user.isEmpty()) {
+                return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+            }
+
+            if(isAuthorized(id, authorizationHeader)) {
+                return new ResponseEntity<>("User not authorized", HttpStatus.UNAUTHORIZED);
+            }
+            List<User> friend = userRepository.findByUsername(username);
+            if (friend.isEmpty()) {
+                return new ResponseEntity<>("Friend not found", HttpStatus.NOT_FOUND);
+            }
+
+
+            FriendRequest friendRequest = new FriendRequest(id, friend.get(0).getId());
+            user.get().addFriendRequest(friendRequest);
+            userRepository.save(user.get());
+            friend.get(0).addFriendRequest(friendRequest);
+            userRepository.save(friend.get(0));
+
+            return new ResponseEntity<>("Friend added succesfully", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Friend add failed", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public List<FriendRequest> getFriendRequests(String id) {
+        Optional<User> user = userRepository.findById(id);
+        return user.get().getFriendRequests();
+    }
+
+    public ResponseEntity<String> acceptFriendRequest(String id, String reqId, String authorizationHeader) {
+        try {
+            Optional<User> user = userRepository.findById(id);
+            if (user.isEmpty()) {
+                return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+            }
+
+            if(isAuthorized(id, authorizationHeader)) {
+                return new ResponseEntity<>("User not authorized", HttpStatus.UNAUTHORIZED);
+            }
+
+            String friendId = user.get().getIdFromFriendRequest(reqId, id);
+            if (friendId == null) {
+                return new ResponseEntity<>("Friend not found", HttpStatus.NOT_FOUND);
+            }
+
+            Optional<User> friendUser = userRepository.findById(friendId);
+            user.get().addFriend(friendUser.get().getId());
+            user.get().removeFriendRequest(reqId);
+            userRepository.save(user.get());
+
+
+            friendUser.get().addFriend(user.get().getId());
+            friendUser.get().removeFriendRequest(reqId);
+            userRepository.save(friendUser.get());
+
+            return new ResponseEntity<>("Friend added succesfully", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Friend add failed", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    public ResponseEntity<String> deleteFriendRequest(String id, String reqId, String authorizationHeader) {
+        try {
+            Optional<User> user = userRepository.findById(id);
+            if (user.isEmpty()) {
+                return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+            }
+
+            if(isAuthorized(id, authorizationHeader)) {
+                return new ResponseEntity<>("User not authorized", HttpStatus.UNAUTHORIZED);
+            }
+
+            String friendId = user.get().getIdFromFriendRequest(reqId, id);
+            if (friendId == null) {
+                return new ResponseEntity<>("Friend not found", HttpStatus.NOT_FOUND);
+            }
+
+            user.get().removeFriendRequest(reqId);
+            userRepository.save(user.get());
+
+            Optional<User> friendUser = userRepository.findById(friendId);
+            if (friendUser.isPresent()) {
+                friendUser.get().removeFriendRequest(reqId);
+                userRepository.save(friendUser.get());
+            } else {
+                return new ResponseEntity<>("Friend not found", HttpStatus.NOT_FOUND);
+            }
+
+            return new ResponseEntity<>("Friend request deleted successfully", HttpStatus.OK);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>("Friend request delete failed", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
 
 

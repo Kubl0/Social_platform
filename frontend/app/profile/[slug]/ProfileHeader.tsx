@@ -6,9 +6,9 @@ import Image from "next/image";
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({ foundUser, session, params }) => {
     return (
-        <div className="px-6 mt-20">
+        <div className="px-6 mt-20 w-full">
             <div className="flex flex-wrap justify-center">
-                <div className="relative mx-auto md:max-w-[50%] mt-6 break-words bg-white w-full mb-6 shadow-lg rounded-xl">
+                <div className="relative mx-auto mt-6 break-words bg-white w-full mb-6 shadow-lg rounded-xl">
                     <div className="w-full flex justify-center">
                         <div className="relative">
                             <div className="mt-[-50px]">
@@ -26,7 +26,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ foundUser, session, param
                             {session && session?.user.id === params.slug && (
                                 <div className="absolute top-3 left-9">
                                     <Link href={`/profile/${session.user.id}/edit`}>
-                                        <button className="group relative flex justify-center w-[40px] top-[100px] left-[100px] rounded-full border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                        <button className="group relative flex justify-center w-[40px] top-[100px] left-[100px] rounded-full border border-transparent bg-violet-600 py-2 px-4 text-sm font-medium text-white hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                                             <p className="emoji">✏️</p>
                                         </button>
                                     </Link>

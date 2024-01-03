@@ -1,3 +1,20 @@
 @import '../node_modules/tailwindcss/base.css';
 @import '../node_modules/tailwindcss/components.css';
 @import '../node_modules/tailwindcss/utilities.css';
+
+.friend-request-container {
+    transition: opacity 1.5s ease, visibility 1.5s ease; /* Adjust the duration and timing function as needed */
+}
+
+/* FriendRequestList component styles */
+.friend-request-list {
+    transition: opacity 1s ease; /* Adjust the duration and timing function as needed */
+}
+
+.verticaltext{
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    letter-spacing: 0.5em;
+}
+
+

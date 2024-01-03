@@ -71,16 +71,16 @@ const PostSection: React.FC<PostSectionProps> = ({ posts }) => {
 
 
     return (
-        <div className="flex flex-wrap justify-center">
-            <div className="relative mx-auto md:max-w-[49%] mt-6 break-words bg-white w-full mb-6 shadow-lg rounded-xl pb-3">
+        <div className="flex flex-wrap justify-center w-full">
+            <div className="relative mx-auto md:max-w-[96%] mt-6 break-words bg-white w-full mb-6 shadow-lg rounded-xl pb-3">
                 <div className="py-6 border-b border-gray-300 text-center">
                     <div className="flex justify-center items-center">
                         <div className="w-full lg:w-10/12 flex items-center justify-between">
                             <span>&nbsp;</span>
-                            <h4 className="text-2xl font-semibold leading-normal text-slate-700">Posts</h4>
+                            <h4 className="text-2xl font-semibold leading-normal text-slate-700">&nbsp;&nbsp;&nbsp;Posts</h4>
                             <button
                                 type="submit"
-                                className="text-2xl font-semibold leading-normal bg-indigo-600 px-2.5 pb-[2px] rounded-full text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                className="text-2xl font-semibold leading-normal bg-violet-600 px-2.5 pb-[2px] rounded-full text-white hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                                 onClick={handleAddPostClick}
                             >
                                 +
@@ -88,6 +88,13 @@ const PostSection: React.FC<PostSectionProps> = ({ posts }) => {
                         </div>
                     </div>
                 </div>
+                {(posts?.length === 0) && (
+                    <div className="flex justify-center items-center">
+                        <div className="w-full flex items-center justify-center mt-12 mb-10">
+                            <h4 className="text-2xl font-semibold leading-normal text-slate-700">No posts yet</h4>
+                        </div>
+                    </div>
+                )}
                 {posts?.map(post => (
                     <div key={post.id} className="w-full px-4 pt-5">
                         <div className="relative flex flex-col min-w-0 break-words bg-white mb-2 shadow-lg rounded-lg p-5">

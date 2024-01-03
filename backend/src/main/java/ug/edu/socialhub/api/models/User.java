@@ -13,12 +13,11 @@ public class User {
     private String email;
     private String password;
     private String username;
-
     private String profilePicture;
     private String description;
-
     private ArrayList<String> posts;
-
+    private ArrayList<String> friendsList;
+    private ArrayList<FriendRequest> friendRequests;
 
 
     public ArrayList<String> getPosts() {
@@ -56,6 +55,8 @@ public class User {
 
     public User() {
         this.posts = new ArrayList<>();
+        this.friendsList = new ArrayList<>();
+        this.friendRequests = new ArrayList<>();
     }
 
     public User(String email, String password, String name) {
@@ -63,6 +64,8 @@ public class User {
         this.password = password;
         this.username = name;
         this.posts = new ArrayList<>();
+        this.friendsList = new ArrayList<>();
+        this.friendRequests = new ArrayList<>();
     }
 
     public String getEmail() {
@@ -100,5 +103,56 @@ public class User {
 
     public String getId() {
         return this.id;
+    }
+
+    public ArrayList<String> getFriendsList() {
+        return friendsList;
+    }
+
+    public void setFriendsList(ArrayList<String> friendsList) {
+        this.friendsList = friendsList;
+    }
+
+    public void addFriend(String friendId) {
+        this.friendsList.add(friendId);
+    }
+
+    public void removeFriend(String friendId) {
+        this.friendsList.remove(friendId);
+    }
+
+    public ArrayList<FriendRequest> getFriendRequests() {
+        return friendRequests;
+    }
+
+    public void setFriendRequests(ArrayList<FriendRequest> friendRequests) {
+        this.friendRequests = friendRequests;
+    }
+
+    public void addFriendRequest(FriendRequest friendRequest) {
+        this.friendRequests.add(friendRequest);
+    }
+
+
+    public void removeFriendRequest(String friendRequestId) {
+        for (FriendRequest friendRequest : this.friendRequests) {
+            if (friendRequest.getId().equals(friendRequestId)) {
+                this.friendRequests.remove(friendRequest);
+                break;
+            }
+        }
+    }
+
+    public String getIdFromFriendRequest(String friendRequestId, String id) {
+        for (FriendRequest friendRequest : this.friendRequests) {
+            if (friendRequest.getId().equals(friendRequestId)) {
+                if (friendRequest.getSenderId().equals(id)) {
+                    return friendRequest.getReceiverId();
+                } else {
+                    return friendRequest.getSenderId();
+                }
+            }
+        }
+        return null;
     }
 }

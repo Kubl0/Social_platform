@@ -102,8 +102,8 @@ export async function getComments(postId: string): Promise<Comment[]> {
     return comments;
 }
 
-export async function getUser(slug: string): Promise<FoundUser> {
-    const response = await fetch(`${API_URL}get/${slug}`, {
+export async function getUser(id: string): Promise<FoundUser> {
+    const response = await fetch(`${API_URL}get/${id}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -189,3 +189,74 @@ export const addPost = async (postContent: string, session: Session | null) => {
         throw error;
     }
 }
+
+export const getFriendRequests = async (slug: string) => {
+    try {
+        const response = await fetch(`${API_URL}getFriendRequests/${slug}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching friend requests:', error);
+        throw error;
+    }
+}
+
+export const removeFriendRequest = async (friendRequestId: string, session: Session | null) => {
+    try {
+        const response = await fetch(`${API_URL}deleteFriendRequest/${session?.user?.id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + session?.accessToken
+            },
+            body: friendRequestId,
+        });
+
+        if (!response.ok) {
+            return new Error('Failed to remove friend request');
+        }
+
+        return response
+    } catch (error) {
+        console.error('Error removing friend request:', error);
+        throw error;
+    }
+}
+
+export const acceptFriendRequest = async (friendRequestId: string, session: Session | null) => {
+    try {
+        const response = await fetch(`${API_URL}acceptFriendRequest/${session?.user?.id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + session?.accessToken
+            },
+            body: friendRequestId,
+        });
+
+        if (!response.ok) {
+            return new Error('Failed to accept friend request');
+        }
+
+        return response
+    } catch (error) {
+        console.error('Error accepting friend request:', error);
+        throw error;
+    }
+}
+
+export const getAllFriends = async (friends: string[]) => {
+    const res: FoundUser[] = [];
+    for (const element of friends) {
+        const friend = await getUser(element);
+        res.push(friend);
+    }
+
+    return res;
+}
+

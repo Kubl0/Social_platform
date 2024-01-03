@@ -12,6 +12,15 @@ export interface FoundUser {
     profilePicture: string;
     description: string;
     email: string;
+    friends: string[];
+}
+
+export interface FriendRequest {
+    id: string;
+    senderId: string;
+    receiverId: string;
+    status: string;
+    date: string;
 }
 
 export interface ProfileHeaderProps {

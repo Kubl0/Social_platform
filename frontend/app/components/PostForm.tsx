@@ -19,8 +19,9 @@ const PostForm: React.FC<PostFormProps> = ({onClose}) => {
             postContent: Yup.string().required('Post content is required'),
         }),
         onSubmit: (values) => {
-            addPost(values.postContent, session).then(r => {
-                if (r == 200) {
+            addPost(values.postContent, session).then((r) => {
+                if(r === 200){
+                    onClose();
                     window.location.reload();
                 }
             });
