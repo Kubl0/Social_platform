@@ -11,10 +11,42 @@
     transition: opacity 1s ease; /* Adjust the duration and timing function as needed */
 }
 
-.verticaltext{
+.verticaltext {
     writing-mode: vertical-rl;
     transform: rotate(180deg);
     letter-spacing: 0.5em;
+}
+
+.error-indicator {
+    position: relative;
+    color: red;
+    font-size: 1.5em;
+    font-weight: bold;
+    right: 4%;
+    display: inline-block;
+    width: 0;
+}
+
+.error-indicator::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    background-color: #e53e3e;
+    white-space: nowrap;
+    left: 1.5rem;
+    top: 0;
+    color: #fff;
+    padding: 0.5rem;
+    border-radius: 4px;
+    visibility: hidden;
+    opacity: 0;
+    font-size: 0.6em;
+    transition: visibility 0s, opacity 0.3s ease;
+    z-index: 1;
+}
+
+.error-indicator:hover::after {
+    visibility: visible;
+    opacity: 1;
 }
 
 

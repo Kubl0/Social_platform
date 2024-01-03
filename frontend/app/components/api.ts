@@ -260,3 +260,26 @@ export const getAllFriends = async (friends: string[]) => {
     return res;
 }
 
+export const addFriendRequest = async (friendName: string, session: Session | null) => {
+    try {
+        const response = await fetch(`${API_URL}addFriendRequest/${session?.user?.id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + session?.accessToken
+            },
+            body: friendName,
+        });
+
+        if (!response.ok) {
+            return response
+        }
+
+        return response
+    } catch (error) {
+        console.error('Error adding friend:', error);
+        throw error;
+    }
+
+}
+

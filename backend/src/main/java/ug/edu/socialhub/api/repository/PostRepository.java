@@ -11,5 +11,4 @@ import java.util.List;
 public interface PostRepository extends MongoRepository<Post, String>{
     @Query("{ 'userId' : ?0 }")
     List<Post> findByUserId(String userId);
-
 }

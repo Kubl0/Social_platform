@@ -4,7 +4,6 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Formik, Field, Form, FormikHelpers } from 'formik';
-import '@/app/auth/register/styles.css';
 import * as Yup from 'yup';
 import { addUser } from '@/app/components/api';
 import { Values } from '@/types/apiTypes';

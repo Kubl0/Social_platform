@@ -88,7 +88,7 @@ const FriendRequestList: React.FC<{ slug: string; session: any }> = ({slug, sess
                         </div>
                     </>
                 ) : (
-                    <p>No friend requests</p>
+                    <p className="text-center">No friend requests</p>
                 )}
             </div>
         </div>

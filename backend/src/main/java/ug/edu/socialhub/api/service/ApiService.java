@@ -233,6 +233,7 @@ public class ApiService {
     }
 
     public ResponseEntity<String> addFriendRequest(String id, String username, String authorizationHeader) {
+        System.out.println("addFriendRequest");
         try {
             Optional<User> user = userRepository.findById(id);
             if (user.isEmpty()) {
@@ -244,7 +245,7 @@ public class ApiService {
             }
             List<User> friend = userRepository.findByUsername(username);
             if (friend.isEmpty()) {
-                return new ResponseEntity<>("Friend not found", HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
             }
 
 
