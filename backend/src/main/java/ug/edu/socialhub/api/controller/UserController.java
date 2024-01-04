@@ -64,6 +64,11 @@ public class UserController {
         return apiService.getPosts(id);
     }
 
+    @GetMapping("/getPostsByWallId/{id}")
+    public List<Post> getPostsByWallId(@PathVariable String id) {
+        return apiService.getPostsByWallId(id);
+    }
+
 
     @PostMapping("/addComment/{id}")
     public ResponseEntity<String> addComment(@PathVariable String id, @RequestBody Comment comment, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {

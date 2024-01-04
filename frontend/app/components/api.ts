@@ -1,5 +1,5 @@
 import {Session} from "next-auth";
-import {Comment, EditUser, FoundUser, Post, Values} from "@/types/apiTypes";
+import {Comment, EditUser, FoundUser, Post, Values, SendPost} from "@/types/apiTypes";
 
 const API_URL = 'http://localhost:8080/api/users/';
 
@@ -101,6 +101,34 @@ export async function getComments(postId: string): Promise<Comment[]> {
 
     return comments;
 }
+export const getPostsByWallId = async (wallId: string) => {
+    try {
+        const response = await fetch(`${API_URL}getPostsByWallId/${wallId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        let posts: Post[] = await response.json();
+
+        posts = posts.map((post: any) => {
+            post.date = new Date(Number(post.date)).toLocaleString([], {
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric',
+            });
+            return post;
+        });
+
+        return posts;
+    } catch (error) {
+        console.error('Error fetching posts:', error);
+        throw error;
+    }
+}
 
 export async function getUser(id: string): Promise<FoundUser> {
     const response = await fetch(`${API_URL}get/${id}`, {
@@ -165,7 +193,7 @@ export const addComment = async (postId: string, commentContent: string, session
     }
 };
 
-export const addPost = async (postContent: string, session: Session | null) => {
+export const addPost = async (postContent: SendPost, session: Session | null) => {
     try{
         const response = await fetch(`${API_URL}addPost/${session?.user.id}`, {
             method: 'POST',
@@ -174,7 +202,8 @@ export const addPost = async (postContent: string, session: Session | null) => {
                 'Authorization': 'Bearer ' + session?.accessToken
             },
             body: JSON.stringify({
-                content: postContent,
+                content: postContent.postContent,
+                wallId: postContent.wallId,
             }),
         });
 
@@ -189,6 +218,8 @@ export const addPost = async (postContent: string, session: Session | null) => {
         throw error;
     }
 }
+
+
 
 export const getFriendRequests = async (slug: string) => {
     try {

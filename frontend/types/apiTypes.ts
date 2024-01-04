@@ -36,12 +36,18 @@ export interface Post {
     userId: string;
     likes: Array<string>;
     comments: Array<Comment>;
+    wallId: string;
 }
 export interface Comment {
     id: string;
     userId: string;
     content: string;
     date: string;
+}
+
+export interface SendPost {
+    postContent: string;
+    wallId: string;
 }
 
 export interface Values {
@@ -57,4 +63,5 @@ export interface LoginValues {
 
 export interface PostSectionProps {
     posts: Post[] | null;
+    slug: string;
 }

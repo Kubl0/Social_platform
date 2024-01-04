@@ -4,7 +4,7 @@ import React, {useEffect, useState} from 'react';
 import {useSession} from 'next-auth/react';
 import ProfileHeader from './ProfileHeader';
 import PostSection from './PostSection';
-import {getPosts, getUser} from "@/app/components/api";
+import {getPosts, getUser, getPostsByWallId} from "@/app/components/api";
 import {FoundUser, Post} from "@/types/apiTypes";
 import FriendRequestList from "@/app/profile/[slug]/FriendRequestList";
 import FriendList from "@/app/profile/[slug]/FriendList";
@@ -24,15 +24,32 @@ const ProfilePage: React.FC<{ params: { slug: string } }> = ({ params }) => {
     }
 
     const [foundUser, setFoundUser] = useState<FoundUser | null>(null);
-    const [posts, setPosts] = useState<Post[] | null>(null);
+    const [posts, setPosts] = useState<Post[]>([]);
 
     useEffect(() => {
         async function fetchData() {
             try {
                 const user = await getUser(slug);
                 setFoundUser(user);
-                const fetchedPosts = await getPosts(slug);
-                setPosts(fetchedPosts);
+
+                const ownPosts = await getPosts(slug);
+                const friendPosts = await getPostsByWallId(slug);
+
+                const combinedPosts = [...ownPosts, ...friendPosts];
+                const uniquePosts = Array.from(new Set(combinedPosts.map(post => post.id)))
+                    .map(postId => combinedPosts.find(post => post.id === postId));
+
+                // Sort posts by date
+                uniquePosts.sort((a, b) => {
+                    if (a && b) {
+                        return new Date(b.date).getTime() - new Date(a.date).getTime();
+                    }
+                    return 0;
+                }
+                );
+
+                // @ts-ignore
+                setPosts(uniquePosts);
             } catch (error) {
                 console.error('Error fetching user:', error);
             }
@@ -51,7 +68,7 @@ const ProfilePage: React.FC<{ params: { slug: string } }> = ({ params }) => {
             </div>
             <div className="flex flex-col items-center w-[60%]">
                 <ProfileHeader foundUser={foundUser} session={session} params={params} />
-                <PostSection posts={posts} />
+                <PostSection posts={posts} slug={slug}/>
             </div>
             <div className="w-[20%]">
                 <FriendList friends={foundUser?.friends} slug={slug} session={session} />

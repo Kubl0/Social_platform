@@ -170,6 +170,7 @@ public class ApiService {
             Post newPost = new Post();
             newPost.setUserId(id);
             newPost.setContent(post.getContent());
+            newPost.setWallId(post.getWallId());
             postRepository.save(newPost);
             user.addPost(newPost.getId());
             userRepository.save(user);
@@ -195,6 +196,10 @@ public class ApiService {
     public List<Post> getPosts(String id) {
         Optional<User> user = userRepository.findById(id);
         return user.map(value -> postRepository.findAllById(value.getPosts())).orElse(null);
+    }
+
+    public List<Post> getWallPosts(String id) {
+        return postRepository.findAllByWallId(id);
     }
 
     public ResponseEntity<String> addComment(String id, String authorizationHeader, Comment comment) {
@@ -233,7 +238,6 @@ public class ApiService {
     }
 
     public ResponseEntity<String> addFriendRequest(String id, String username, String authorizationHeader) {
-        System.out.println("addFriendRequest");
         try {
             Optional<User> user = userRepository.findById(id);
             if (user.isEmpty()) {
@@ -248,6 +252,31 @@ public class ApiService {
                 return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
             }
 
+            String friendId = friend.get(0).getId();
+
+            for (FriendRequest friendRequest : user.get().getFriendRequests()) {
+                if (friendRequest.getSenderId().equals(id) && friendRequest.getReceiverId().equals(friendId)) {
+                    return new ResponseEntity<>("Friend request already sent", HttpStatus.CONFLICT);
+                }
+            }
+
+            for (FriendRequest friendRequest : user.get().getFriendRequests()) {
+                if (friendRequest.getReceiverId().equals(id) && friendRequest.getSenderId().equals(friendId)) {
+                    user.get().addFriend(friendId);
+                    user.get().removeFriendRequest(friendRequest.getId());
+                    friend.get(0).addFriend(id);
+                    friend.get(0).removeFriendRequest(friendRequest.getId());
+                    userRepository.save(user.get());
+                    userRepository.save(friend.get(0));
+                    return new ResponseEntity<>("Friend added succesfully", HttpStatus.OK);
+                }
+            }
+
+
+
+            if (user.get().getFriendsList().contains(friendId)) {
+                return new ResponseEntity<>("User is already your friend", HttpStatus.CONFLICT);
+            }
 
             FriendRequest friendRequest = new FriendRequest(id, friend.get(0).getId());
             user.get().addFriendRequest(friendRequest);
@@ -331,6 +360,10 @@ public class ApiService {
         } catch (Exception e) {
             return new ResponseEntity<>("Friend request delete failed", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    public List<Post> getPostsByWallId(String id) {
+        return postRepository.findAllByWallId(id);
     }
 }
 

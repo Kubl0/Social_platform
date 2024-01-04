@@ -7,7 +7,7 @@ import PostForm from "@/app/components/PostForm";
 
 
 
-const PostSection: React.FC<PostSectionProps> = ({ posts }) => {
+const PostSection: React.FC<PostSectionProps> = ({ posts , slug}) => {
     const [usernames, setUsernames] = useState<{ [key: string]: string }>({});
     const [selectedLike, setSelectedLike] = useState<string | null>(null);
     const [selectedComment, setSelectedComment] = useState<string | null>(null);
@@ -34,7 +34,7 @@ const PostSection: React.FC<PostSectionProps> = ({ posts }) => {
             <div className="bg-white p-8 rounded-lg w-[40%]">
                 <h2 className="text-2xl font-semibold mb-4">Add Post</h2>
                 <div className="">
-                    <PostForm onClose={handleCloseAddPostPopup} />
+                    <PostForm onClose={handleCloseAddPostPopup} slug={slug} />
                 </div>
             </div>
         </div>

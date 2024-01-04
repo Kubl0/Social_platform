@@ -14,6 +14,16 @@ public class Post {
     private String content;
     private String date;
 
+    public String getWallId() {
+        return wallId;
+    }
+
+    public void setWallId(String wallId) {
+        this.wallId = wallId;
+    }
+
+    private String wallId;
+
     private ArrayList<String> likes;
     private ArrayList<Comment> comments;
 
@@ -23,9 +33,10 @@ public class Post {
         this.date = String.valueOf(System.currentTimeMillis());
     }
 
-    public Post(String userId, String content) {
+    public Post(String userId, String content, String wallId) {
         this.userId = userId;
         this.content = content;
+        this.wallId = wallId;
         this.date = String.valueOf(System.currentTimeMillis());
         this.likes = new ArrayList<>();
         this.comments = new ArrayList<>();
@@ -101,6 +112,7 @@ public class Post {
                 ", date='" + date + '\'' +
                 ", likes=" + likes +
                 ", comments=" + comments +
+                ", wallId='" + wallId + '\'' +
                 '}';
     }
 
