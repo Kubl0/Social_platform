@@ -114,4 +114,9 @@ public class UserController {
         System.out.println(searchTerm);
         return apiService.searchUsers(searchTerm);
     }
+
+    @DeleteMapping("/deleteFriend/{id}")
+    public ResponseEntity<String> deleteFriend(@PathVariable String id, @RequestBody String friendId, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+        return apiService.deleteFriend(id, friendId, authorizationHeader);
+    }
 }

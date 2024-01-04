@@ -7,7 +7,7 @@ import PostForm from "@/app/components/PostForm";
 import {useSession} from "next-auth/react";
 
 
-const PostSection: React.FC<PostSectionProps> = ({posts, slug}) => {
+const PostSection: React.FC<PostSectionProps> = ({posts, slug, refresh}) => {
     const [usernames, setUsernames] = useState<{ [key: string]: string }>({});
     const [selectedLike, setSelectedLike] = useState<string | null>(null);
     const [selectedComment, setSelectedComment] = useState<string | null>(null);
@@ -29,7 +29,6 @@ const PostSection: React.FC<PostSectionProps> = ({posts, slug}) => {
 
         isFriend(slug, session?.user?.id).then(isFriend => {
                 setIsFriendCheck(isFriend);
-                console.log(isFriend)
             }
         );
 
@@ -41,6 +40,7 @@ const PostSection: React.FC<PostSectionProps> = ({posts, slug}) => {
 
     const handleCloseAddPostPopup = () => {
         setIsAddPostPopupOpen(false);
+        refresh();
     };
 
     const renderAddPostPopup = () => (
@@ -76,7 +76,9 @@ const PostSection: React.FC<PostSectionProps> = ({posts, slug}) => {
     );
 
     const renderCommentsComponent = () => selectedComment && (
-        <CommentList postId={selectedComment} onClose={() => setSelectedComment(null)}/>
+        <CommentList postId={selectedComment} refresh={refresh} onClose={() => {
+            setSelectedComment(null)
+        }}/>
     );
 
     const renderLikesComponent = () => selectedLike && (
@@ -90,7 +92,8 @@ const PostSection: React.FC<PostSectionProps> = ({posts, slug}) => {
                 className="relative mx-auto md:max-w-[96%] mt-6 break-words bg-white w-full mb-6 shadow-lg rounded-xl pb-3">
                 <div className="py-6 border-b border-gray-300 text-center">
                     <div className="flex justify-center items-center">
-                        <div className={`w-full lg:w-10/12 flex items-center justify-${isFriendCheck ? 'between' : 'center'}`}>
+                        <div
+                            className={`w-full lg:w-10/12 flex items-center justify-${isFriendCheck ? 'between' : 'center'}`}>
                             <span>&nbsp;</span>
                             <h4 className="text-2xl font-semibold leading-normal text-slate-700">&nbsp;&nbsp;&nbsp;Posts</h4>
                             {isFriendCheck && (
@@ -124,20 +127,46 @@ const PostSection: React.FC<PostSectionProps> = ({posts, slug}) => {
                                     <p className="text-sm text-slate-600 uppercase ml-2 align mr-5">{post.date}</p>
                                 </div>
                                 <h4 className="text-[1.1em] leading-normal mb-2 text-slate-700">{post.content}</h4>
-                                <div className="flex flex-row items-center">
-                                    <button
-                                        className="text-sm text-slate-600 mt-3 cursor-pointer"
-                                        onClick={() => handlePopupOpen(post.id, 'like')}
-                                    >
-                                        {post.likes.length} likes
-                                    </button>
-                                    &nbsp;&nbsp;
-                                    <button
-                                        className="text-sm text-slate-600 mt-3 cursor-pointer"
-                                        onClick={() => handlePopupOpen(post.id, 'comment')}
-                                    >
-                                        {post.comments.length} comments
-                                    </button>
+                                <div className="flex flex-row items-center justify-between">
+                                    <div>
+                                        <button
+                                            className="text-sm text-slate-600 mt-3 cursor-pointer"
+                                            onClick={() => handlePopupOpen(post.id, 'like')}
+                                        >
+                                            {post.likes.length} likes
+                                        </button>
+                                        &nbsp;&nbsp;
+                                        <button
+                                            className="text-sm text-slate-600 mt-3 cursor-pointer"
+                                            onClick={() => handlePopupOpen(post.id, 'comment')}
+                                        >
+                                            {post.comments.length} comments
+                                        </button>
+                                    </div>
+                                    <div className="mr-5">
+                                        {session?.user?.id === post.userId && (
+                                            <>
+                                                <button
+                                                    className="text-lg text-slate-600 mt-3 cursor-pointer mr-3"
+                                                    onClick={() => {
+                                                        alert('edit')
+                                                    }
+                                                    }
+                                                >
+                                                    ✏️
+                                                </button>
+                                                <button
+                                                    className="text-lg text-slate-600 mt-3 cursor-pointer"
+                                                    onClick={() => {
+                                                        alert('delete')
+                                                    }}
+                                                >
+                                                    🗑️
+                                                </button>
+
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>

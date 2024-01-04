@@ -346,3 +346,25 @@ export const searchUsers = async (searchTerm: string) => {
     }
 }
 
+export const deleteFriend = async (friendId: string, session: Session | null) => {
+    try {
+        const response = await fetch(`${API_URL}deleteFriend/${session?.user?.id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + session?.accessToken
+            },
+            body: friendId,
+        });
+
+        if (!response.ok) {
+            return new Error('Failed to delete friend');
+        }
+
+        return response
+    } catch (error) {
+        console.error('Error deleting friend:', error);
+        throw error;
+    }
+}
+

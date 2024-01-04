@@ -411,6 +411,39 @@ public class ApiService {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    public ResponseEntity<String> deleteFriend(String id, String friendId, String authorizationHeader) {
+        try {
+            Optional<User> user = userRepository.findById(id);
+            if (user.isEmpty()) {
+                return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+            }
+
+            if (isAuthorized(id, authorizationHeader)) {
+                return new ResponseEntity<>("User not authorized", HttpStatus.UNAUTHORIZED);
+            }
+
+            if (!user.get().getFriendsList().contains(friendId)) {
+                return new ResponseEntity<>("User is not your friend", HttpStatus.NOT_FOUND);
+            }
+
+            user.get().removeFriend(friendId);
+            userRepository.save(user.get());
+
+            Optional<User> friendUser = userRepository.findById(friendId);
+            if (friendUser.isPresent()) {
+                friendUser.get().removeFriend(id);
+                userRepository.save(friendUser.get());
+            } else {
+                return new ResponseEntity<>("Friend not found", HttpStatus.NOT_FOUND);
+            }
+
+            return new ResponseEntity<>("Friend deleted successfully", HttpStatus.OK);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>("Friend delete failed", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
 
 

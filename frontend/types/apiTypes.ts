@@ -65,4 +65,5 @@ export interface LoginValues {
 export interface PostSectionProps {
     posts: Post[] | null;
     slug: string;
+    refresh: () => void;
 }

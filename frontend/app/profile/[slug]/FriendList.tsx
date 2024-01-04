@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { getAllFriends } from "@/app/components/api";
+import {deleteFriend, getAllFriends} from "@/app/components/api";
 import Image from "next/image";
 import InvitePopup from "@/app/profile/[slug]/InvitePopup";
 
-const FriendList: React.FC<{ slug: string; session: any; friends: string[] | undefined }> = ({ slug, session, friends }) => {
+const FriendList: React.FC<{ slug: string; session: any; friends: string[] | undefined, refresh: () => void }> = ({ slug, session, friends, refresh }) => {
     const [friendList, setFriendList] = useState<any[]>([]);
     const [hoveredFriend, setHoveredFriend] = useState<string | null>(null);
     const [isInvitePopupOpen, setIsInvitePopupOpen] = useState(false);
@@ -29,6 +29,7 @@ const FriendList: React.FC<{ slug: string; session: any; friends: string[] | und
 
     const closeInvitePopup = () => {
         setIsInvitePopupOpen(false);
+        refresh();
     }
 
     return (
@@ -77,10 +78,12 @@ const FriendList: React.FC<{ slug: string; session: any; friends: string[] | und
                                         {hoveredFriend === friend.id && session?.user?.id === slug && (
                                             <button
                                                 className="bg-red-300 ml-5 px-2 h-6 mt-1.5 rounded-md text-xs text-red-800 font-bold"
-                                                onClick={() => console.log('remove friend')}
-                                            >
-                                                X
-                                            </button>
+                                                onClick={() => {
+                                                    deleteFriend(friend.id, session).then(() => {
+                                                        refresh();
+                                                    });
+                                                }}
+                                            > X </button>
                                         )}
 
                                     </div>
@@ -95,7 +98,6 @@ const FriendList: React.FC<{ slug: string; session: any; friends: string[] | und
                 )}
             </div>
 
-            {/* Render the InvitePopup component outside the loop */}
             {isInvitePopupOpen && <InvitePopup onClose={closeInvitePopup} />}
         </div>
     );

@@ -24,7 +24,6 @@ const PostForm: React.FC<PostFormProps> = ({onClose, wallId}) => {
             addPost(values, session).then((r) => {
                 if(r === 200){
                     onClose();
-                    window.location.reload();
                 }
             });
             formik.resetForm();
