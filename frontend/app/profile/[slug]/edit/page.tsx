@@ -3,7 +3,8 @@
 import React, {useEffect, useState} from 'react';
 import {useSession} from 'next-auth/react';
 import {Session} from "next-auth";
-import {EditUser, updateUser, getUserEditData} from "@/app/components/api";
+import {updateUser, getUserEditData} from "@/app/components/api";
+import {EditUser} from "@/types/apiTypes";
 
 
 export default function EditProfilePage({params}: Readonly<{ params: { slug: string } }>) {
@@ -23,7 +24,7 @@ export default function EditProfilePage({params}: Readonly<{ params: { slug: str
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const {name, value} = e.target;
-        setEditedUser((prevUser) => ({
+        setEditedUser((prevUser: EditUser) => ({
             ...prevUser,
             [name]: value,
         }));

@@ -13,6 +13,7 @@ import ug.edu.socialhub.api.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.security.Key;
 
@@ -385,6 +386,30 @@ public class ApiService {
             return true;
         }
         return user.map(value -> value.getFriendsList().contains(userId)).orElse(false);
+    }
+
+    public ResponseEntity<List<FoundUser>> searchUsers(String searchTerm) {
+        try {
+            List<User> users = userRepository.findByUsernameStartingWithIgnoreCase(searchTerm);
+            List<FoundUser> foundUsers = new ArrayList<>();
+
+            for (User user : users) {
+                FoundUser foundUser = new FoundUser(
+                        user.getEmail(),
+                        user.getUsername(),
+                        user.getProfilePicture(),
+                        user.getDescription(),
+                        user.getId(),
+                        user.getFriendsList()
+                );
+
+                foundUsers.add(foundUser);
+            }
+
+            return new ResponseEntity<>(foundUsers, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
 

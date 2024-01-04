@@ -2,12 +2,13 @@
 'use client'
 import Link from 'next/link';
 import {signIn, signOut, useSession} from "next-auth/react";
+import SearchUserBar from "@/app/components/SearchUserBar";
 
 
 export default function Navbar() {
     const {data: session } = useSession();
     return (
-        <div className="sticky top-0 z-50 bg-violet-500 pb-2.5 pr-2.5 pl-2.5">
+        <div className="sticky top-0 z-50 bg-violet-500 pb-2.5 pr-2.5 pl-2.5 h-[50px]">
             <div className="flex justify-between items-center">
                 <div className="flex items-center">
                     <Link href="/">
@@ -23,8 +24,8 @@ export default function Navbar() {
                     </Link>
                 </div>
 
-                <div>
-                    <p></p>
+                <div className="mt-2 w-[20%]">
+                    <SearchUserBar />
                 </div>
 
                 <div className="flex items-center">

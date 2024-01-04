@@ -61,6 +61,7 @@ const FriendList: React.FC<{ slug: string; session: any; friends: string[] | und
                             >
                                 <div className="flex">
                                     <div className="mb flex flex-row mb-5">
+                                        <a href={`/profile/${friend.id}`} className="text-black hover:underline flex flex-row">
                                         <Image
                                             src={
                                                 friend?.profilePicture ??
@@ -72,6 +73,7 @@ const FriendList: React.FC<{ slug: string; session: any; friends: string[] | und
                                             height={40}
                                         />
                                         <p className="w-[75%] font-bold text-lg mt-1">{friend.username}</p>
+                                        </a>
                                         {hoveredFriend === friend.id && session?.user?.id === slug && (
                                             <button
                                                 className="bg-red-300 ml-5 px-2 h-6 mt-1.5 rounded-md text-xs text-red-800 font-bold"
@@ -80,6 +82,7 @@ const FriendList: React.FC<{ slug: string; session: any; friends: string[] | und
                                                 X
                                             </button>
                                         )}
+
                                     </div>
                                 </div>
                             </div>

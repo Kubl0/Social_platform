@@ -8,6 +8,7 @@ export interface EditUser {
 }
 
 export interface FoundUser {
+    id: string;
     username: string;
     profilePicture: string;
     description: string;

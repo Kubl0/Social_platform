@@ -33,7 +33,7 @@ const PostSection: React.FC<PostSectionProps> = ({posts, slug}) => {
             }
         );
 
-    }, [slug, posts]);
+    }, [slug, posts, session?.user?.id]);
 
     const handleAddPostClick = () => {
         setIsAddPostPopupOpen(true);

@@ -40,7 +40,6 @@ public class UserController {
     @PostMapping("/test")
     public String test(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
         String token = apiService.extractToken(authorizationHeader);
-
         return apiService.test(token);
     }
 
@@ -108,5 +107,11 @@ public class UserController {
     @GetMapping("/isFriend/{friendId}/{userId}")
     public boolean isFriend(@PathVariable String friendId, @PathVariable String userId) {
         return apiService.isFriend(friendId, userId);
+    }
+
+    @GetMapping("/search/{searchTerm}")
+    public ResponseEntity<List<FoundUser>> searchUsers(@PathVariable String searchTerm) {
+        System.out.println(searchTerm);
+        return apiService.searchUsers(searchTerm);
     }
 }

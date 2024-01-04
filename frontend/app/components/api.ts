@@ -330,3 +330,19 @@ export const addFriendRequest = async (friendName: string, session: Session | nu
 
 }
 
+export const searchUsers = async (searchTerm: string) => {
+    try {
+        const response = await fetch(`${API_URL}search/${searchTerm}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error searching users:', error);
+        throw error;
+    }
+}
+
