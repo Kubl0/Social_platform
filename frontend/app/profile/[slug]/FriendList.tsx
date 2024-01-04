@@ -40,12 +40,14 @@ const FriendList: React.FC<{ slug: string; session: any; friends: string[] | und
                         Friend list
                     </h2>
                     <div className="mr-10">
+                        {session?.user?.id === slug && (
                     <button
                         onClick={openInvitePopup}
                         className="bg-blue-500 text-white px-2 rounded-xl pb-0.5"
                     >
                         +
                     </button>
+                )}
                     </div>
                 </div>
                 {friendList.length > 0 ? (

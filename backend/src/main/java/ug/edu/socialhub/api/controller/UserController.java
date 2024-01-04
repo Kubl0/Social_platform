@@ -69,6 +69,11 @@ public class UserController {
         return apiService.getPostsByWallId(id);
     }
 
+    @GetMapping("/getAllPosts")
+    public List<Post> getAllPosts() {
+        return apiService.getAllPosts();
+    }
+
 
     @PostMapping("/addComment/{id}")
     public ResponseEntity<String> addComment(@PathVariable String id, @RequestBody Comment comment, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
@@ -98,5 +103,10 @@ public class UserController {
     @DeleteMapping("/deleteFriendRequest/{id}")
     public ResponseEntity<String> deleteFriendRequest(@PathVariable String id, @RequestBody String reqId, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
         return apiService.deleteFriendRequest(id, reqId, authorizationHeader);
+    }
+
+    @GetMapping("/isFriend/{friendId}/{userId}")
+    public boolean isFriend(@PathVariable String friendId, @PathVariable String userId) {
+        return apiService.isFriend(friendId, userId);
     }
 }

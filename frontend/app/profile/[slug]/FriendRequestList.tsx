@@ -29,7 +29,7 @@ const FriendRequestList: React.FC<{ slug: string; session: any }> = ({slug, sess
         if (session?.user?.id) {
             getFriendRequests(session?.user?.id as string).then((r) => setFriendRequests(r));
         }
-    }, [session]);
+    });
 
     return session?.user?.id === slug ? (
         <div className="friend-request-list bg-violet-100 rounded-r-3xl pb-2 w-[90%]">

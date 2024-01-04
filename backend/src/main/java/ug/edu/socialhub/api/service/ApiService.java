@@ -163,8 +163,14 @@ public class ApiService {
 
             User user = postUser.get();
 
-            if(isAuthorized(id, authorizationHeader)) {
+            if (isAuthorized(id, authorizationHeader)) {
                 return new ResponseEntity<>("User not authorized", HttpStatus.UNAUTHORIZED);
+            }
+
+            if (!post.getWallId().equals("/")) {
+                if (!isFriend(id, post.getWallId())) {
+                    return new ResponseEntity<>("User not authorized", HttpStatus.UNAUTHORIZED);
+                }
             }
 
             Post newPost = new Post();
@@ -198,6 +204,10 @@ public class ApiService {
         return user.map(value -> postRepository.findAllById(value.getPosts())).orElse(null);
     }
 
+    public List<Post> getAllPosts() {
+        return postRepository.findAll();
+    }
+
     public List<Post> getWallPosts(String id) {
         return postRepository.findAllByWallId(id);
     }
@@ -211,7 +221,7 @@ public class ApiService {
 
             User user = postUser.get();
 
-            if(isAuthorized(comment.getUserId(), authorizationHeader)) {
+            if (isAuthorized(comment.getUserId(), authorizationHeader)) {
                 return new ResponseEntity<>("User not authorized", HttpStatus.UNAUTHORIZED);
             }
 
@@ -244,12 +254,16 @@ public class ApiService {
                 return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
             }
 
-            if(isAuthorized(id, authorizationHeader)) {
+            if (isAuthorized(id, authorizationHeader)) {
                 return new ResponseEntity<>("User not authorized", HttpStatus.UNAUTHORIZED);
             }
             List<User> friend = userRepository.findByUsername(username);
             if (friend.isEmpty()) {
                 return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+            }
+
+            if (friend.get(0).getId().equals(id)) {
+                return new ResponseEntity<>("Can't invite yourself", HttpStatus.NOT_FOUND);
             }
 
             String friendId = friend.get(0).getId();
@@ -271,7 +285,6 @@ public class ApiService {
                     return new ResponseEntity<>("Friend added succesfully", HttpStatus.OK);
                 }
             }
-
 
 
             if (user.get().getFriendsList().contains(friendId)) {
@@ -302,7 +315,7 @@ public class ApiService {
                 return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
             }
 
-            if(isAuthorized(id, authorizationHeader)) {
+            if (isAuthorized(id, authorizationHeader)) {
                 return new ResponseEntity<>("User not authorized", HttpStatus.UNAUTHORIZED);
             }
 
@@ -335,7 +348,7 @@ public class ApiService {
                 return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
             }
 
-            if(isAuthorized(id, authorizationHeader)) {
+            if (isAuthorized(id, authorizationHeader)) {
                 return new ResponseEntity<>("User not authorized", HttpStatus.UNAUTHORIZED);
             }
 
@@ -364,6 +377,14 @@ public class ApiService {
 
     public List<Post> getPostsByWallId(String id) {
         return postRepository.findAllByWallId(id);
+    }
+
+    public boolean isFriend(String id, String userId) {
+        Optional<User> user = userRepository.findById(id);
+        if (id.equals(userId)) {
+            return true;
+        }
+        return user.map(value -> value.getFriendsList().contains(userId)).orElse(false);
     }
 }
 

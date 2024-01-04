@@ -130,6 +130,22 @@ export const getPostsByWallId = async (wallId: string) => {
     }
 }
 
+export const isFriend = async (userId: string, friendId: string | undefined) => {
+    try {
+        const response = await fetch(`${API_URL}isFriend/${userId}/${friendId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching friend status:', error);
+        throw error;
+    }
+}
+
 export async function getUser(id: string): Promise<FoundUser> {
     const response = await fetch(`${API_URL}get/${id}`, {
         method: 'GET',

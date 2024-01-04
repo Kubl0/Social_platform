@@ -6,17 +6,16 @@ import { useSession } from 'next-auth/react';
 
 interface PostFormProps {
     onClose: () => void; // Callback function for close button
-    slug: string;
+    wallId: string;
 }
 
-const PostForm: React.FC<PostFormProps> = ({onClose, slug}) => {
-    console.log(slug)
+const PostForm: React.FC<PostFormProps> = ({onClose, wallId}) => {
     const { data: session } = useSession();
 
     const formik = useFormik({
         initialValues: {
             postContent: '',
-            wallId: slug,
+            wallId: wallId,
         },
         validationSchema: Yup.object({
             postContent: Yup.string().required('Post content is required'),

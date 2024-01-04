@@ -1,25 +1,39 @@
-import React, { useEffect, useState } from 'react';
-import { getUserName } from '@/app/components/api';
-import { PostSectionProps } from '@/types/apiTypes';
+import React, {useEffect, useState} from 'react';
+import {getUserName, isFriend} from '@/app/components/api';
+import {PostSectionProps} from '@/types/apiTypes';
 import CommentList from "@/app/profile/[slug]/CommentList";
 import LikeList from "@/app/profile/[slug]/LikeList";
 import PostForm from "@/app/components/PostForm";
+import {useSession} from "next-auth/react";
 
 
-
-const PostSection: React.FC<PostSectionProps> = ({ posts , slug}) => {
+const PostSection: React.FC<PostSectionProps> = ({posts, slug}) => {
     const [usernames, setUsernames] = useState<{ [key: string]: string }>({});
     const [selectedLike, setSelectedLike] = useState<string | null>(null);
     const [selectedComment, setSelectedComment] = useState<string | null>(null);
     const [isAddPostPopupOpen, setIsAddPostPopupOpen] = useState(false);
+    const [user, setUser] = useState("");
+    const [isFriendCheck, setIsFriendCheck] = useState(false);
+    const {data: session} = useSession();
 
     useEffect(() => {
+        getUserName(slug).then(username => {
+            setUser(username);
+        });
+
         posts?.forEach(post => {
             getUserName(post.userId).then(username => {
-                setUsernames(prevUsernames => ({ ...prevUsernames, [post.userId]: username }));
+                setUsernames(prevUsernames => ({...prevUsernames, [post.userId]: username}));
             });
         });
-    }, [posts]);
+
+        isFriend(slug, session?.user?.id).then(isFriend => {
+                setIsFriendCheck(isFriend);
+                console.log(isFriend)
+            }
+        );
+
+    }, [slug, posts]);
 
     const handleAddPostClick = () => {
         setIsAddPostPopupOpen(true);
@@ -34,7 +48,7 @@ const PostSection: React.FC<PostSectionProps> = ({ posts , slug}) => {
             <div className="bg-white p-8 rounded-lg w-[40%]">
                 <h2 className="text-2xl font-semibold mb-4">Add Post</h2>
                 <div className="">
-                    <PostForm onClose={handleCloseAddPostPopup} slug={slug} />
+                    <PostForm onClose={handleCloseAddPostPopup} wallId={slug}/>
                 </div>
             </div>
         </div>
@@ -62,29 +76,32 @@ const PostSection: React.FC<PostSectionProps> = ({ posts , slug}) => {
     );
 
     const renderCommentsComponent = () => selectedComment && (
-        <CommentList postId={selectedComment} onClose={() => setSelectedComment(null)} />
+        <CommentList postId={selectedComment} onClose={() => setSelectedComment(null)}/>
     );
 
     const renderLikesComponent = () => selectedLike && (
-        <LikeList />
+        <LikeList/>
     );
 
 
     return (
         <div className="flex flex-wrap justify-center w-full">
-            <div className="relative mx-auto md:max-w-[96%] mt-6 break-words bg-white w-full mb-6 shadow-lg rounded-xl pb-3">
+            <div
+                className="relative mx-auto md:max-w-[96%] mt-6 break-words bg-white w-full mb-6 shadow-lg rounded-xl pb-3">
                 <div className="py-6 border-b border-gray-300 text-center">
                     <div className="flex justify-center items-center">
-                        <div className="w-full lg:w-10/12 flex items-center justify-between">
+                        <div className={`w-full lg:w-10/12 flex items-center justify-${isFriendCheck ? 'between' : 'center'}`}>
                             <span>&nbsp;</span>
                             <h4 className="text-2xl font-semibold leading-normal text-slate-700">&nbsp;&nbsp;&nbsp;Posts</h4>
-                            <button
-                                type="submit"
-                                className="text-2xl font-semibold leading-normal bg-violet-600 px-2.5 pb-[2px] rounded-full text-white hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                                onClick={handleAddPostClick}
-                            >
-                                +
-                            </button>
+                            {isFriendCheck && (
+                                <button
+                                    type="submit"
+                                    className="text-2xl font-semibold leading-normal bg-violet-600 px-2.5 pb-[2px] rounded-full text-white hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                    onClick={handleAddPostClick}
+                                >
+                                    +
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -97,10 +114,13 @@ const PostSection: React.FC<PostSectionProps> = ({ posts , slug}) => {
                 )}
                 {posts?.map(post => (
                     <div key={post.id} className="w-full px-4 pt-5">
-                        <div className="relative flex flex-col min-w-0 break-words bg-white mb-2 shadow-lg rounded-lg p-5">
+                        <div
+                            className="relative flex flex-col min-w-0 break-words bg-white mb-2 shadow-lg rounded-lg p-5">
                             <div className="flex-auto lg:pt-2 pl-5 pb-2">
                                 <div className="flex flex-row items-center mb-2 justify-between">
-                                    <p className="text-xl text-slate-600 font-bold uppercase">{usernames[post.userId]}</p>
+                                    <p className="text-xl text-slate-600 font-bold uppercase">
+                                        {user !== usernames[post.userId] ? `${usernames[post.userId]} > ${user}` : usernames[post.userId]}
+                                    </p>
                                     <p className="text-sm text-slate-600 uppercase ml-2 align mr-5">{post.date}</p>
                                 </div>
                                 <h4 className="text-[1.1em] leading-normal mb-2 text-slate-700">{post.content}</h4>
