@@ -2,14 +2,15 @@ import React, {useEffect, useState} from 'react';
 import {acceptFriendRequest, getFriendRequests, removeFriendRequest} from '@/app/components/api';
 import {FriendRequest} from '@/types/apiTypes';
 
-const FriendRequestList: React.FC<{ slug: string; session: any }> = ({slug, session}) => {
+const FriendRequestList: React.FC<{ slug: string; session: any, refresh: () => void, refreshReq: boolean }> = ({slug, session, refresh, refreshReq}) => {
     const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
+    const [refreshFriendRequests, setRefreshFriendRequests] = useState(false);
 
     const handleCancelClick = async (friendRequestId: string) => {
         try {
-            const result = await removeFriendRequest(friendRequestId, session);
-
-            console.log('Friend request removed successfully:', result);
+            await removeFriendRequest(friendRequestId, session);
+            refresh();
+            setRefreshFriendRequests(!refreshFriendRequests)
         } catch (error) {
             console.error('Error removing friend request:', error);
         }
@@ -17,9 +18,9 @@ const FriendRequestList: React.FC<{ slug: string; session: any }> = ({slug, sess
 
     const handleAcceptClick = async (friendRequestId: string) => {
         try {
-            const result = await acceptFriendRequest(friendRequestId, session);
-
-            console.log('Friend request removed successfully:', result);
+            await acceptFriendRequest(friendRequestId, session);
+            refresh();
+            setRefreshFriendRequests(!refreshFriendRequests);
         } catch (error) {
             console.error('Error removing friend request:', error);
         }
@@ -29,7 +30,7 @@ const FriendRequestList: React.FC<{ slug: string; session: any }> = ({slug, sess
         if (session?.user?.id) {
             getFriendRequests(session?.user?.id as string).then((r) => setFriendRequests(r));
         }
-    });
+    }, [session?.user?.id, slug, refreshFriendRequests, refreshReq]);
 
     return session?.user?.id === slug ? (
         <div className="friend-request-list bg-violet-100 rounded-r-3xl pb-2 w-[90%]">

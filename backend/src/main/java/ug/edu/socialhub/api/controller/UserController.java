@@ -111,12 +111,55 @@ public class UserController {
 
     @GetMapping("/search/{searchTerm}")
     public ResponseEntity<List<FoundUser>> searchUsers(@PathVariable String searchTerm) {
-        System.out.println(searchTerm);
         return apiService.searchUsers(searchTerm);
     }
 
     @GetMapping("/getPostsFromFriends/{id}")
     public ResponseEntity<List<Post>> getPostsFromFriends(@PathVariable String id) {
         return apiService.getPostsFromFriends(id);
+      
+    @DeleteMapping("/deleteFriend/{id}")
+    public ResponseEntity<String> deleteFriend(@PathVariable String id, @RequestBody String friendId, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+        return apiService.deleteFriend(id, friendId, authorizationHeader);
+    }
+
+    @PostMapping("/addLike/{id}")
+    public ResponseEntity<String> addLike(@PathVariable String id, @RequestBody String userId, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+        return apiService.addLike(id, userId, authorizationHeader);
+    }
+
+    @GetMapping("/getLikes/{id}")
+    public List<String> getLikes(@PathVariable String id) {
+        return apiService.getLikes(id);
+    }
+
+    @DeleteMapping("/deleteLike/{id}")
+    public ResponseEntity<String> deleteLike(@PathVariable String id, @RequestBody String userId, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+        return apiService.deleteLike(id, userId, authorizationHeader);
+    }
+
+    @GetMapping("isLiked/{id}/{userId}")
+    public boolean isLiked(@PathVariable String id, @PathVariable String userId) {
+        return apiService.isLiked(id, userId);
+    }
+
+    @DeleteMapping("/deleteComment/{postId}/{commentId}")
+    public ResponseEntity<String> deleteComment(@PathVariable String postId, @PathVariable String commentId, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+        return apiService.deleteComment(postId, commentId, authorizationHeader);
+    }
+
+    @DeleteMapping("/deletePost/{id}")
+    public ResponseEntity<String> deletePost(@PathVariable String id, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+        return apiService.deletePost(id, authorizationHeader);
+    }
+
+    @PutMapping("/updatePost/{id}")
+    public ResponseEntity<String> updatePost(@PathVariable String id, @RequestBody String content, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+        return apiService.updatePost(id, content, authorizationHeader);
+    }
+
+    @PutMapping("/updateComment/{postId}/{commentId}")
+    public ResponseEntity<String> updateComment(@PathVariable String postId, @PathVariable String commentId, @RequestBody String content, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+        return apiService.updateComment(postId, commentId, content, authorizationHeader);
     }
 }

@@ -412,7 +412,7 @@ public class ApiService {
         }
     }
 
-    public ResponseEntity<List<Post>> getPostsFromFriends(String id) {
+  public ResponseEntity<List<Post>> getPostsFromFriends(String id) {
         try {
             Optional<User> user = userRepository.findById(id);
             if (user.isEmpty()) {
@@ -429,7 +429,243 @@ public class ApiService {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    
+  
+    public ResponseEntity<String> deleteFriend(String id, String friendId, String authorizationHeader) {
+        try {
+            Optional<User> user = userRepository.findById(id);
+            if (user.isEmpty()) {
+                return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+            }
+
+            if (isAuthorized(id, authorizationHeader)) {
+                return new ResponseEntity<>("User not authorized", HttpStatus.UNAUTHORIZED);
+            }
+
+            if (!user.get().getFriendsList().contains(friendId)) {
+                return new ResponseEntity<>("User is not your friend", HttpStatus.NOT_FOUND);
+            }
+
+            user.get().removeFriend(friendId);
+            userRepository.save(user.get());
+
+            Optional<User> friendUser = userRepository.findById(friendId);
+            if (friendUser.isPresent()) {
+                friendUser.get().removeFriend(id);
+                userRepository.save(friendUser.get());
+            } else {
+                return new ResponseEntity<>("Friend not found", HttpStatus.NOT_FOUND);
+            }
+
+            return new ResponseEntity<>("Friend deleted successfully", HttpStatus.OK);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>("Friend delete failed", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<String> addLike(String id, String userId, String authorizationHeader) {
+        try {
+            Optional<User> postUser = userRepository.findById(userId);
+            if (postUser.isEmpty()) {
+                return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+            }
+
+            User user = postUser.get();
+
+            if (isAuthorized(userId, authorizationHeader)) {
+                return new ResponseEntity<>("User not authorized", HttpStatus.UNAUTHORIZED);
+            }
+
+            Optional<Post> post = postRepository.findById(id);
+            if (post.isEmpty()) {
+                return new ResponseEntity<>("Post not found", HttpStatus.NOT_FOUND);
+            }
+
+            if (post.get().getLikes().contains(userId)) {
+                return new ResponseEntity<>("Like already added", HttpStatus.CONFLICT);
+            }
+
+            Post postToUpdate = post.get();
+            postToUpdate.addLike(userId);
+            postRepository.save(postToUpdate);
+
+            return new ResponseEntity<>("Like added succesfully", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Like add failed", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public List<String> getLikes(String id) {
+        Optional<Post> post = postRepository.findById(id);
+        return post.map(Post::getLikes).orElse(null);
+    }
+
+    public ResponseEntity<String> deleteLike(String id, String userId, String authorizationHeader) {
+        try {
+            Optional<User> postUser = userRepository.findById(userId);
+            if (postUser.isEmpty()) {
+                return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+            }
+
+            User user = postUser.get();
+
+            if (isAuthorized(userId, authorizationHeader)) {
+                return new ResponseEntity<>("User not authorized", HttpStatus.UNAUTHORIZED);
+            }
+
+            Optional<Post> post = postRepository.findById(id);
+            if (post.isEmpty()) {
+                return new ResponseEntity<>("Post not found", HttpStatus.NOT_FOUND);
+            }
+
+            if (!post.get().getLikes().contains(userId)) {
+                return new ResponseEntity<>("Like not found", HttpStatus.NOT_FOUND);
+            }
+
+            Post postToUpdate = post.get();
+            postToUpdate.removeLike(userId);
+            postRepository.save(postToUpdate);
+
+            return new ResponseEntity<>("Like deleted succesfully", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Like delete failed", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public boolean isLiked(String id, String userId) {
+        Optional<Post> post = postRepository.findById(id);
+        return post.map(value -> value.getLikes().contains(userId)).orElse(false);
+    }
+
+    public ResponseEntity<String> deleteComment(String postId, String commentId, String authorizationHeader) {
+        try {
+            Optional<Post> post = postRepository.findById(postId);
+            if (post.isEmpty()) {
+                return new ResponseEntity<>("Post not found", HttpStatus.NOT_FOUND);
+            }
+
+            Post postToUpdate = post.get();
+            Optional<Comment> commentToDelete = postToUpdate.getComments().stream()
+                    .filter(comment -> comment.getId().equals(commentId))
+                    .findFirst();
+
+            if (commentToDelete.isEmpty()) {
+                return new ResponseEntity<>("Comment not found", HttpStatus.NOT_FOUND);
+            }
+
+            Comment comment = commentToDelete.get();
+            String userId = comment.getUserId();
+
+            Optional<User> user = userRepository.findById(userId);
+
+            if (user.isEmpty()) {
+                return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+            }
+
+            if (isAuthorized(userId, authorizationHeader)) {
+                return new ResponseEntity<>("User not authorized", HttpStatus.UNAUTHORIZED);
+            }
+
+            postToUpdate.removeComment(comment);
+            postRepository.save(postToUpdate);
+
+            return new ResponseEntity<>("Comment deleted successfully", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Comment delete failed", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<String> deletePost(String id, String authorizationHeader) {
+        try {
+            Optional<Post> post = postRepository.findById(id);
+            Post postToDelete = post.get();
+
+            Optional<User> postUser = userRepository.findById(postToDelete.getUserId());
+            if (postUser.isEmpty()) {
+                return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+            }
+            User user = postUser.get();
+
+            if (isAuthorized(user.getId(), authorizationHeader)) {
+                return new ResponseEntity<>("User not authorized", HttpStatus.UNAUTHORIZED);
+            }
+
+            Post postToUpdate = post.get();
+            user.removePost(postToUpdate.getId());
+            userRepository.save(user);
+            postRepository.delete(postToUpdate);
+
+            return new ResponseEntity<>("Post deleted succesfully", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Post delete failed", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
+    public ResponseEntity<String> updatePost(String id, String content, String authorizationHeader) {
+        try {
+            Optional<Post> postToUpdate = postRepository.findById(id);
+            if (postToUpdate.isEmpty()) {
+                return new ResponseEntity<>("Post not found", HttpStatus.NOT_FOUND);
+            }
+
+            Optional<User> postUser = userRepository.findById(postToUpdate.get().getUserId());
+            if (postUser.isEmpty()) {
+                return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+            }
+            User user = postUser.get();
+
+            if (isAuthorized(user.getId(), authorizationHeader)) {
+                return new ResponseEntity<>("User not authorized", HttpStatus.UNAUTHORIZED);
+            }
+
+            Post postToEdit = postToUpdate.get();
+            postToEdit.setContent(content);
+            postRepository.save(postToEdit);
+
+            return new ResponseEntity<>("Post updated succesfully", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Post update failed", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<String> updateComment(String postId, String commentId, String content, String authorizationHeader) {
+        try {
+            Optional<Post> post = postRepository.findById(postId);
+            if (post.isEmpty()) {
+                return new ResponseEntity<>("Post not found", HttpStatus.NOT_FOUND);
+            }
+
+            Post postToUpdate = post.get();
+            Optional<Comment> commentToUpdate = postToUpdate.getComments().stream()
+                    .filter(comment1 -> comment1.getId().equals(commentId))
+                    .findFirst();
+
+            if (commentToUpdate.isEmpty()) {
+                return new ResponseEntity<>("Comment not found", HttpStatus.NOT_FOUND);
+            }
+
+            Comment commentToEdit = commentToUpdate.get();
+            String userId = commentToEdit.getUserId();
+
+            Optional<User> user = userRepository.findById(userId);
+
+            if (user.isEmpty()) {
+                return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+            }
+
+            if (isAuthorized(userId, authorizationHeader)) {
+                return new ResponseEntity<>("User not authorized", HttpStatus.UNAUTHORIZED);
+            }
+
+            commentToEdit.setContent(content);
+            postRepository.save(postToUpdate);
+
+            return new ResponseEntity<>("Comment updated successfully", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Comment update failed", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
 
 

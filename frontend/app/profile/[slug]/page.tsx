@@ -25,10 +25,14 @@ const ProfilePage: React.FC<{ params: { slug: string } }> = ({ params }) => {
 
     const [foundUser, setFoundUser] = useState<FoundUser | null>(null);
     const [posts, setPosts] = useState<Post[]>([]);
+    const [refresh, setRefresh] = useState(false);
 
     useEffect(() => {
         async function fetchData() {
             try {
+                if (!slug) {
+                    return;
+                }
                 const user = await getUser(slug);
                 setFoundUser(user);
 
@@ -39,9 +43,15 @@ const ProfilePage: React.FC<{ params: { slug: string } }> = ({ params }) => {
             } catch (error) {
                 console.error('Error fetching user:', error);
             }
+
         }
         fetchData().then(r => r);
-    }, [slug]);
+    }, [slug, refresh]);
+
+    const handleRefresh = () => {
+        setRefresh(!refresh);
+    }
+
 
     return (
         <div>
@@ -49,15 +59,15 @@ const ProfilePage: React.FC<{ params: { slug: string } }> = ({ params }) => {
         <div className="flex justify-center">
             <div className="w-[20%]" onMouseLeave={handleMouseLeave}>
                 <div className="friend-request-container" style={{ opacity: isFriendRequestListVisible ? 1 : 0, visibility: isFriendRequestListVisible ? 'visible' : 'hidden' }}>
-                    <FriendRequestList slug={slug} session={session} />
+                    <FriendRequestList slug={slug} session={session} refresh={handleRefresh} refreshReq={refresh}/>
                 </div>
             </div>
             <div className="flex flex-col items-center w-[60%]">
                 <ProfileHeader foundUser={foundUser} session={session} params={params} />
-                <PostSection posts={posts} slug={slug}/>
+                <PostSection posts={posts} slug={slug} refresh={handleRefresh}/>
             </div>
             <div className="w-[20%]">
-                <FriendList friends={foundUser?.friends} slug={slug} session={session} />
+                <FriendList friends={foundUser?.friends} slug={slug} session={session} refresh={handleRefresh} />
             </div>
         </div>
         </div>
