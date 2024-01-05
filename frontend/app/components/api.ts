@@ -346,3 +346,32 @@ export const searchUsers = async (searchTerm: string) => {
     }
 }
 
+export const getAllFriendsPosts = async (userId: string) => {
+    try {
+        const response = await fetch(`${API_URL}getPostsFromFriends/${userId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        let posts: Post[] = await response.json();
+
+        posts = posts.map((post: any) => {
+            post.date = new Date(Number(post.date)).toLocaleString([], {
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric',
+            });
+            return post;
+        });
+
+        return posts;
+    }
+    catch (error) {
+        console.error('Error fetching posts:', error);
+        throw error;
+    }
+}

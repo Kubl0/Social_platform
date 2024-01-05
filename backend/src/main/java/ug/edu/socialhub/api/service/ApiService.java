@@ -411,6 +411,25 @@ public class ApiService {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    public ResponseEntity<List<Post>> getPostsFromFriends(String id) {
+        try {
+            Optional<User> user = userRepository.findById(id);
+            if (user.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+
+            List<Post> posts = new ArrayList<>();
+            for (String friendId : user.get().getFriendsList()) {
+                posts.addAll(postRepository.findAllByWallId(friendId));
+            }
+
+            return new ResponseEntity<>(posts, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
 }
 
 

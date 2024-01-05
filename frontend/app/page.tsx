@@ -10,6 +10,9 @@ import {FoundUser, Post} from "@/types/apiTypes";
 import {getUser, getAllFriendsPosts} from "@/app/components/api";
 import Link from "next/link";
 import Image from "next/image";
+import PostSection from "./profile/[slug]/PostSection";
+import FriendsPosts from "./homepageassets/FriendsPosts";
+
 
 
 const Home: React.FC<{ params: { slug: string } }> = ({ params }) => {
@@ -24,6 +27,8 @@ const Home: React.FC<{ params: { slug: string } }> = ({ params }) => {
     const handleCloseAddPostPopup = () => {
         setIsAddPostPopupOpen(false);
     };
+
+    const [posts, setPosts] = useState<Post[]>([]);
 
     const [foundUser, setFoundUser] = useState<FoundUser | null>(null);
 
@@ -41,6 +46,9 @@ const Home: React.FC<{ params: { slug: string } }> = ({ params }) => {
                 const user = await getUser(session?.user?.id as string);
                 setFoundUser(user);
                 console.log(foundUser);
+                const friendPosts = await getAllFriendsPosts(session?.user?.id as string);
+                console.log(friendPosts)
+                setPosts(friendPosts);
 
                 
             } catch (error) {
@@ -59,7 +67,7 @@ const Home: React.FC<{ params: { slug: string } }> = ({ params }) => {
     return (
         <div className="flex justify-center mt-8">
           {/* Left Sidebar */}
-          <div className={`flex-none w-1/5 px-4`}
+          <div className={`flex-none w-1/5 px-4 fixed left-0`}
           >
             <div>
               <p className={`p-4 rounded ${isHovered === 'left' ? 'bg-violet-100' : ""}`}
@@ -79,16 +87,22 @@ const Home: React.FC<{ params: { slug: string } }> = ({ params }) => {
             <div className=" p-4 flex justify-center" >
               <div className="w-1/2">
               <PostForm onClose={handleCloseAddPostPopup} wallId={`${session.user?.id}`} />
+              <FriendsPosts posts={posts} slug={slug}  />
+
+                
+
+              
+
 
               </div>
             </div>
           </div>
     
           {/* Right Sidebar */}
-          <div className="flex-none w-1/5 px-4">
-            <p className="mb-2 mr-2">Friend List</p>
+          <div className="flex-none w-1/5 px-4 fixed right-0">
             <div>
                 <FriendList friends={foundUser?.friends} slug={slug} session={session} />
+
               
             </div>
           </div>

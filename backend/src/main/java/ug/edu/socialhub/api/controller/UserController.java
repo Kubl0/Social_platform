@@ -114,4 +114,9 @@ public class UserController {
         System.out.println(searchTerm);
         return apiService.searchUsers(searchTerm);
     }
+
+    @GetMapping("/getPostsFromFriends/{id}")
+    public ResponseEntity<List<Post>> getPostsFromFriends(@PathVariable String id) {
+        return apiService.getPostsFromFriends(id);
+    }
 }
