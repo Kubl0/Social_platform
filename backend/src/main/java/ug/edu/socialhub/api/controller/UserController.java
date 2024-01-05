@@ -117,6 +117,7 @@ public class UserController {
     @GetMapping("/getPostsFromFriends/{id}")
     public ResponseEntity<List<Post>> getPostsFromFriends(@PathVariable String id) {
         return apiService.getPostsFromFriends(id);
+    }
       
     @DeleteMapping("/deleteFriend/{id}")
     public ResponseEntity<String> deleteFriend(@PathVariable String id, @RequestBody String friendId, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
