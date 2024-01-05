@@ -421,7 +421,7 @@ public class ApiService {
 
             List<Post> posts = new ArrayList<>();
             for (String friendId : user.get().getFriendsList()) {
-                posts.addAll(postRepository.findAllByWallId(friendId));
+                posts.addAll(postRepository.findByUserId(friendId));
             }
 
             return new ResponseEntity<>(posts, HttpStatus.OK);

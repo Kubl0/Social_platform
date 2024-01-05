@@ -3,11 +3,11 @@
 import React, {useEffect, useState} from 'react';
 import {useSession} from 'next-auth/react';
 import ProfileHeader from './ProfileHeader';
-import PostSection from './PostSection';
+import PostSection from '../../components/PostSection/PostSection';
 import {getUser, getPostsByWallId} from "@/app/components/api";
 import {FoundUser, Post} from "@/types/apiTypes";
 import FriendRequestList from "@/app/profile/[slug]/FriendRequestList";
-import FriendList from "@/app/profile/[slug]/FriendList";
+import FriendList from "@/app/components/FriendList";
 
 
 const ProfilePage: React.FC<{ params: { slug: string } }> = ({ params }) => {

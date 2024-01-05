@@ -10,8 +10,8 @@ import {
     updatePost
 } from '@/app/components/api';
 import {FoundUser, PostSectionProps} from '@/types/apiTypes';
-import CommentList from "@/app/profile/[slug]/CommentList";
-import LikeList from "@/app/profile/[slug]/LikeList";
+import CommentList from "@/app/components/PostSection/CommentList";
+import LikeList from "@/app/components/PostSection/LikeList";
 import PostForm from "@/app/components/PostForm";
 import {useSession} from "next-auth/react";
 import {Session} from "next-auth";
@@ -23,18 +23,14 @@ const PostSection: React.FC<PostSectionProps> = ({posts, slug, refresh}) => {
     const [selectedLike, setSelectedLike] = useState<string | null>(null);
     const [selectedComment, setSelectedComment] = useState<string | null>(null);
     const [isAddPostPopupOpen, setIsAddPostPopupOpen] = useState(false);
-    const [user, setUser] = useState("");
     const [isFriendCheck, setIsFriendCheck] = useState(false);
     const {data: session} = useSession();
     const [likedStatus, setLikedStatus] = useState<{ [key: string]: boolean }>({});
     const [hoveredPostId, setHoveredPostId] = useState<string | null>(null);
     const [editPost, setEditPost] = useState("");
-
+    const [wallUser, setWallUser] = useState<{ [key: string]: string }>({});
 
     useEffect(() => {
-        getUserName(slug).then(username => {
-            setUser(username);
-        });
 
         posts?.forEach(post => {
             getUserName(post.userId).then(() => {
@@ -52,6 +48,15 @@ const PostSection: React.FC<PostSectionProps> = ({posts, slug, refresh}) => {
                 });
             });
         });
+
+        posts?.forEach(post => {
+            if(post.wallId !== null && post.wallId !== post.userId) {
+            getUserName(post.wallId).then(username => {
+                setWallUser(prevUsernames => ({...prevUsernames, [post.wallId]: username}));
+            });
+            }
+        });
+
 
         isFriend(slug, session?.user?.id).then(isFriend => {
                 setIsFriendCheck(isFriend);
@@ -195,7 +200,7 @@ const PostSection: React.FC<PostSectionProps> = ({posts, slug, refresh}) => {
                                             height={30}
                                         />
                                         <p className="text-xl text-slate-600 font-bold uppercase">
-                                            {user !== usernames[post.userId] ? `${usernames[post.userId]} > ${user}` : usernames[post.userId]}
+                                            {wallUser[post.wallId] !== usernames[post.userId] && wallUser[post.wallId] !== undefined ? `${usernames[post.userId]} > ${wallUser[post.wallId]}` : usernames[post.userId]}
                                         </p>
                                     </div>
                                     <p className="text-sm text-slate-600 uppercase ml-2 align mr-5">{post.date}</p>
