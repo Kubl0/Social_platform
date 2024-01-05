@@ -5,9 +5,12 @@ import PostForm from "@/app/components/PostForm";
 import {useEffect, useState} from "react";
 import {useSession} from "next-auth/react";
 import { Session } from "next-auth";
-import FriendList from "./homepageassets/FriendList";
-import {FoundUser} from "@/types/apiTypes";
-import {getUser} from "@/app/components/api";
+import FriendList from "./profile/[slug]/FriendList";
+import {FoundUser, Post} from "@/types/apiTypes";
+import {getUser, getAllFriendsPosts} from "@/app/components/api";
+import Link from "next/link";
+import Image from "next/image";
+
 
 const Home: React.FC<{ params: { slug: string } }> = ({ params }) => {
 
@@ -35,16 +38,17 @@ const Home: React.FC<{ params: { slug: string } }> = ({ params }) => {
     useEffect(() => {
         async function fetchData() {
             try {
-                const user = await getUser(slug);
+                const user = await getUser(session?.user?.id as string);
                 setFoundUser(user);
                 console.log(foundUser);
+
                 
             } catch (error) {
                 console.error('Error fetching user:', error);
             }
         }
         fetchData().then(r => r);
-    }, [slug]);
+    }, [slug, session]);
 
     
 
@@ -61,10 +65,11 @@ const Home: React.FC<{ params: { slug: string } }> = ({ params }) => {
               <p className={`p-4 rounded ${isHovered === 'left' ? 'bg-violet-100' : ""}`}
             onMouseEnter={() => setIsHovered('left')}
             onMouseLeave={() => setIsHovered('')}>Options</p>
-              <p className={`p-4 rounded ${isHovered === 'profile' ? 'bg-violet-100' : ""}`}
+              <p className={`p-4 rounded ${isHovered === 'profile' ? 'bg-violet-100' : ""} flex gap-2`}
             onMouseEnter={() => setIsHovered('profile')}
             onMouseLeave={() => setIsHovered('')}>
-                Your, profile - {session.user?.username}</p>
+                
+                Your, profile - <Link href={`/profile/${session.user?.id}`} className="hover:text-blue-700">{session.user?.username}</Link></p>
             </div>
           </div>
     
@@ -73,7 +78,8 @@ const Home: React.FC<{ params: { slug: string } }> = ({ params }) => {
             <p className="flex justify-center">Main Content (Posts)</p>
             <div className=" p-4 flex justify-center" >
               <div className="w-1/2">
-              <PostForm onClose={handleCloseAddPostPopup} wallId={"/"} />
+              <PostForm onClose={handleCloseAddPostPopup} wallId={`${session.user?.id}`} />
+
               </div>
             </div>
           </div>
