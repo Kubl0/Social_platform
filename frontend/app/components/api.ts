@@ -346,6 +346,37 @@ export const searchUsers = async (searchTerm: string) => {
     }
 }
 
+
+export const getAllFriendsPosts = async (userId: string) => {
+    try {
+        const response = await fetch(`${API_URL}getPostsFromFriends/${userId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        let posts: Post[] = await response.json();
+
+        posts = posts.map((post: any) => {
+            post.date = new Date(Number(post.date)).toLocaleString([], {
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric',
+            });
+            return post;
+        });
+
+        return posts;
+    }
+    catch (error) {
+        console.error('Error fetching posts:', error);
+        throw error;
+    }
+}
+
 export const deleteFriend = async (friendId: string, session: Session | null) => {
     try {
         const response = await fetch(`${API_URL}deleteFriend/${session?.user?.id}`, {
@@ -417,12 +448,7 @@ export const removeLike = async (postId: string, session: Session | null) => {
 export const getLikes = async (postId: string) => {
     try {
         const response = await fetch(`${API_URL}getLikes/${postId}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-
+          
         return await response.json();
     } catch (error) {
         console.error('Error fetching likes:', error);
