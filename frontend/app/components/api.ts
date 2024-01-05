@@ -448,7 +448,11 @@ export const removeLike = async (postId: string, session: Session | null) => {
 export const getLikes = async (postId: string) => {
     try {
         const response = await fetch(`${API_URL}getLikes/${postId}`, {
-          
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
         return await response.json();
     } catch (error) {
         console.error('Error fetching likes:', error);
