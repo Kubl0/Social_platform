@@ -444,6 +444,80 @@ public class ApiService {
             return new ResponseEntity<>("Friend delete failed", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    public ResponseEntity<String> addLike(String id, String userId, String authorizationHeader) {
+        try {
+            Optional<User> postUser = userRepository.findById(userId);
+            if (postUser.isEmpty()) {
+                return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+            }
+
+            User user = postUser.get();
+
+            if (isAuthorized(userId, authorizationHeader)) {
+                return new ResponseEntity<>("User not authorized", HttpStatus.UNAUTHORIZED);
+            }
+
+            Optional<Post> post = postRepository.findById(id);
+            if (post.isEmpty()) {
+                return new ResponseEntity<>("Post not found", HttpStatus.NOT_FOUND);
+            }
+
+            if (post.get().getLikes().contains(userId)) {
+                return new ResponseEntity<>("Like already added", HttpStatus.CONFLICT);
+            }
+
+            Post postToUpdate = post.get();
+            postToUpdate.addLike(userId);
+            postRepository.save(postToUpdate);
+
+            return new ResponseEntity<>("Like added succesfully", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Like add failed", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public List<String> getLikes(String id) {
+        Optional<Post> post = postRepository.findById(id);
+        return post.map(Post::getLikes).orElse(null);
+    }
+
+    public ResponseEntity<String> deleteLike(String id, String userId, String authorizationHeader) {
+        try {
+            Optional<User> postUser = userRepository.findById(userId);
+            if (postUser.isEmpty()) {
+                return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+            }
+
+            User user = postUser.get();
+
+            if (isAuthorized(userId, authorizationHeader)) {
+                return new ResponseEntity<>("User not authorized", HttpStatus.UNAUTHORIZED);
+            }
+
+            Optional<Post> post = postRepository.findById(id);
+            if (post.isEmpty()) {
+                return new ResponseEntity<>("Post not found", HttpStatus.NOT_FOUND);
+            }
+
+            if (!post.get().getLikes().contains(userId)) {
+                return new ResponseEntity<>("Like not found", HttpStatus.NOT_FOUND);
+            }
+
+            Post postToUpdate = post.get();
+            postToUpdate.removeLike(userId);
+            postRepository.save(postToUpdate);
+
+            return new ResponseEntity<>("Like deleted succesfully", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Like delete failed", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public boolean isLiked(String id, String userId) {
+        Optional<Post> post = postRepository.findById(id);
+        return post.map(value -> value.getLikes().contains(userId)).orElse(false);
+    }
 }
 
 

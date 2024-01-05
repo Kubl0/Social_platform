@@ -101,6 +101,7 @@ export async function getComments(postId: string): Promise<Comment[]> {
 
     return comments;
 }
+
 export const getPostsByWallId = async (wallId: string) => {
     try {
         const response = await fetch(`${API_URL}getPostsByWallId/${wallId}`, {
@@ -165,7 +166,7 @@ export async function addUser(values: Values) {
     try {
         const res = await fetch(`${API_URL}register`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 email: values.email,
                 username: values.username,
@@ -174,12 +175,12 @@ export async function addUser(values: Values) {
         });
 
         if (res.status === 200) {
-            return { type: "success", message: await res.text() };
+            return {type: "success", message: await res.text()};
         } else {
-            return { type: "error", message: await res.text() };
+            return {type: "error", message: await res.text()};
         }
     } catch (error) {
-        return { type: "error", message: error };
+        return {type: "error", message: error};
     }
 }
 
@@ -210,7 +211,7 @@ export const addComment = async (postId: string, commentContent: string, session
 };
 
 export const addPost = async (postContent: SendPost, session: Session | null) => {
-    try{
+    try {
         const response = await fetch(`${API_URL}addPost/${session?.user.id}`, {
             method: 'POST',
             headers: {
@@ -234,7 +235,6 @@ export const addPost = async (postContent: SendPost, session: Session | null) =>
         throw error;
     }
 }
-
 
 
 export const getFriendRequests = async (slug: string) => {
@@ -367,4 +367,85 @@ export const deleteFriend = async (friendId: string, session: Session | null) =>
         throw error;
     }
 }
+
+export const addLike = async (postId: string, session: Session | null) => {
+    try {
+        const response = await fetch(`${API_URL}addLike/${postId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + session?.accessToken
+                },
+                body: session?.user?.id,
+            }
+        );
+
+        if (!response.ok) {
+            return new Error('Failed to add like');
+        }
+
+        return response
+    } catch (error) {
+        console.error('Error adding like:', error);
+        throw error;
+    }
+}
+
+export const removeLike = async (postId: string, session: Session | null) => {
+    try {
+        const response = await fetch(`${API_URL}deleteLike/${postId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + session?.accessToken
+            },
+            body: session?.user?.id,
+        });
+
+        if (!response.ok) {
+            return new Error('Failed to remove like');
+        }
+
+        return response
+
+    } catch (error) {
+        console.error('Error removing like:', error);
+        throw error;
+    }
+}
+
+export const getLikes = async (postId: string) => {
+    try {
+        const response = await fetch(`${API_URL}getLikes/${postId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching likes:', error);
+        throw error;
+    }
+}
+
+export const isLiked = async (postId: string, session: Session | null) => {
+    try {
+        const response = await fetch(`${API_URL}isLiked/${postId}/${session?.user?.id}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching like status:', error);
+        throw error;
+    }
+}
+
+
+
 

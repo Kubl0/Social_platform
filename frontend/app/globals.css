@@ -49,4 +49,12 @@
     opacity: 1;
 }
 
+.visible {
+    display: block;
+}
+
+.hidden {
+    display: none;
+}
+
 

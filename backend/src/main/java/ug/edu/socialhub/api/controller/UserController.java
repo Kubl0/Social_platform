@@ -119,4 +119,24 @@ public class UserController {
     public ResponseEntity<String> deleteFriend(@PathVariable String id, @RequestBody String friendId, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
         return apiService.deleteFriend(id, friendId, authorizationHeader);
     }
+
+    @PostMapping("/addLike/{id}")
+    public ResponseEntity<String> addLike(@PathVariable String id, @RequestBody String userId, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+        return apiService.addLike(id, userId, authorizationHeader);
+    }
+
+    @GetMapping("/getLikes/{id}")
+    public List<String> getLikes(@PathVariable String id) {
+        return apiService.getLikes(id);
+    }
+
+    @DeleteMapping("/deleteLike/{id}")
+    public ResponseEntity<String> deleteLike(@PathVariable String id, @RequestBody String userId, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+        return apiService.deleteLike(id, userId, authorizationHeader);
+    }
+
+    @GetMapping("isLiked/{id}/{userId}")
+    public boolean isLiked(@PathVariable String id, @PathVariable String userId) {
+        return apiService.isLiked(id, userId);
+    }
 }

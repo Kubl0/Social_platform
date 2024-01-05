@@ -1,8 +1,9 @@
 import React, {useEffect, useState} from 'react';
-import {addComment, getComments, getUserName} from '@/app/components/api';
-import {Comment} from '@/types/apiTypes';
+import {addComment, getComments, getUser} from '@/app/components/api';
+import {Comment, FoundUser} from '@/types/apiTypes';
 import {Field, Form, Formik, FormikHelpers} from "formik";
 import {useSession} from "next-auth/react";
+import Image from "next/image";
 
 interface CommentsComponentProps {
     postId: string;
@@ -13,23 +14,23 @@ interface CommentsComponentProps {
 const CommentsComponent: React.FC<CommentsComponentProps> = ({postId, onClose, refresh}) => {
     const {data: session} = useSession();
     const [comments, setComments] = useState<Comment[]>([]);
-    const [commentUsernames, setCommentUsernames] = useState<{ [key: string]: string }>({});
+    const [commentUserData, setCommentUserData] = useState<{ [key: string]: FoundUser }>({});
+    const [refreshComments, setRefreshComments] = useState(false);
 
     useEffect(() => {
         getComments(postId).then((fetchedComments) => {
             setComments(fetchedComments);
-            const usernamePromises = fetchedComments.map(comment =>
-                getUserName(comment.userId).then(username => ({ userId: comment.userId, username }))
+            const userDataPromises = fetchedComments.map(comment =>
+                getUser(comment.userId).then(user => ({userId: comment.userId, user}))
             );
 
             // Wait for all promises to resolve
-            Promise.all(usernamePromises).then(usernames => {
-                const usernamesMap = Object.fromEntries(usernames.map(({ userId, username }) => [userId, username]));
-                setCommentUsernames(usernamesMap);
+            Promise.all(userDataPromises).then(usersData => {
+                const userMap = Object.fromEntries(usersData.map(({userId, user}) => [userId, user]));
+                setCommentUserData(userMap);
             });
         });
-
-    }, [postId]);
+    }, [postId, refreshComments]);
 
     const handleNewCommentSubmit = async (values: { newComment: string }, {resetForm}: FormikHelpers<{
         newComment: string
@@ -39,6 +40,7 @@ const CommentsComponent: React.FC<CommentsComponentProps> = ({postId, onClose, r
         const updatedComments = await getComments(postId);
         setComments(updatedComments);
         refresh();
+        setRefreshComments(!refreshComments);
         resetForm();
     };
 
@@ -57,7 +59,19 @@ const CommentsComponent: React.FC<CommentsComponentProps> = ({postId, onClose, r
                     <div key={comment.id}>
                         <div className="p-3">
                             <div className="flex justify-between">
-                                <span className="text-md font-semibold">{commentUsernames[comment.userId]}</span>
+                                <div className="flex items-center">
+                                    {/* Display user profile picture */}
+                                    <Image
+                                        src={commentUserData[comment.userId]?.profilePicture ?? 'https://www.charitycomms.org.uk/wp-content/uploads/2019/02/placeholder-image-square.jpg'}
+                                        alt="Profile"
+                                        className="rounded-full mr-2"
+                                        width={25}
+                                        height={25}
+                                    />
+                                    <span className="text-md font-semibold">
+                                {commentUserData[comment.userId]?.username}
+                                </span>
+                                </div>
                                 <span className="text-sm text-gray-500"> {comment.date}</span>
                             </div>
                             <div className="flex flex-row justify-between mt-2">
