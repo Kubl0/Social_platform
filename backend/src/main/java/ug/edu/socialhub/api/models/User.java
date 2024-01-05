@@ -155,4 +155,8 @@ public class User {
         }
         return null;
     }
+
+    public void removePost(String id) {
+        this.posts.remove(id);
+    }
 }

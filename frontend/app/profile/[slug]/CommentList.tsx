@@ -1,9 +1,10 @@
 import React, {useEffect, useState} from 'react';
-import {addComment, getComments, getUser} from '@/app/components/api';
+import {addComment, getComments, getUser, removeComment, updateComment} from '@/app/components/api';
 import {Comment, FoundUser} from '@/types/apiTypes';
 import {Field, Form, Formik, FormikHelpers} from "formik";
 import {useSession} from "next-auth/react";
 import Image from "next/image";
+import {Session} from "next-auth";
 
 interface CommentsComponentProps {
     postId: string;
@@ -16,6 +17,7 @@ const CommentsComponent: React.FC<CommentsComponentProps> = ({postId, onClose, r
     const [comments, setComments] = useState<Comment[]>([]);
     const [commentUserData, setCommentUserData] = useState<{ [key: string]: FoundUser }>({});
     const [refreshComments, setRefreshComments] = useState(false);
+    const [editComment, setEditComment] = useState("")
 
     useEffect(() => {
         getComments(postId).then((fetchedComments) => {
@@ -42,6 +44,30 @@ const CommentsComponent: React.FC<CommentsComponentProps> = ({postId, onClose, r
         refresh();
         setRefreshComments(!refreshComments);
         resetForm();
+    };
+
+    const [editPostContent, setEditPostContent] = useState("");
+
+    const handleEditClick = (postId: string, content: string) => {
+        setEditComment(postId);
+        setEditPostContent(content);
+    };
+
+    const handleSaveEdit = async (postId: string, session: Session | null, commentId: string, editPostContent: string) => {
+        // Call your updatePost function here with postId and updated content
+        await updateComment(postId, commentId, editPostContent, session)
+
+        // Clear the edit state and refresh the posts
+        setEditComment("");
+        setEditPostContent("");
+        setRefreshComments(!refreshComments);
+        refresh();
+    };
+
+    const handleCancelEdit = () => {
+        // Clear the edit state
+        setEditComment("");
+        setEditPostContent("");
     };
 
     return (
@@ -75,6 +101,8 @@ const CommentsComponent: React.FC<CommentsComponentProps> = ({postId, onClose, r
                                 <span className="text-sm text-gray-500"> {comment.date}</span>
                             </div>
                             <div className="flex flex-row justify-between mt-2">
+                                {editComment !== comment.id ? (
+                                    <>
                                 <span className="text-sm text-gray-500 "> {comment.content}</span>
                                 <div className="">
                                     {session?.user?.id === comment.userId && (
@@ -82,7 +110,7 @@ const CommentsComponent: React.FC<CommentsComponentProps> = ({postId, onClose, r
                                             <button
                                                 className="text-sm text-slate-600 cursor-pointer mr-3"
                                                 onClick={() => {
-                                                    alert('edit')
+                                                    handleEditClick(comment.id, comment.content);
                                                 }
                                                 }
                                             >
@@ -91,14 +119,38 @@ const CommentsComponent: React.FC<CommentsComponentProps> = ({postId, onClose, r
                                             <button
                                                 className="text-sm text-slate-600 cursor-pointer"
                                                 onClick={() => {
-                                                    alert('delete')
+                                                    removeComment(comment.id, session, postId).then(() => {
+                                                        setRefreshComments(!refreshComments)
+                                                    });
                                                 }}
                                             >
                                                 🗑️
                                             </button>
                                         </div>
-                                    )}
+                                        )}
                                 </div>
+                                    </>
+                                ) : (
+                                    <div className="flex flex-row w-full">
+                                        <textarea
+                                            value={editPostContent}
+                                            onChange={(e) => setEditPostContent(e.target.value)}
+                                            className="w-full h-10 text-sm p-2 border rounded"
+                                        />
+                                        <button
+                                            onClick={handleCancelEdit}
+                                            className="text-md text-slate-600 cursor-pointer w-0 relative left-[-50px]"
+                                        >
+                                            ❌
+                                        </button>
+                                        <button
+                                            onClick={() => handleSaveEdit(postId, session, comment.id, editPostContent)}
+                                            className="text-md text-slate-600 cursor-pointer w-0 relative left-[-27px]"
+                                        >
+                                            ✔️
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -112,7 +164,7 @@ const CommentsComponent: React.FC<CommentsComponentProps> = ({postId, onClose, r
                             type="text"
                             name="newComment"
                             placeholder="Add a new comment..."
-                            className="border p-2 w-full"
+                            className="border p-2 w-full rounded-md"
                         />
                         <div className="flex justify-end w-full mt-2">
                             <button type="submit"

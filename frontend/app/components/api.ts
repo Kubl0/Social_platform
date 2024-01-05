@@ -446,6 +446,92 @@ export const isLiked = async (postId: string, session: Session | null) => {
     }
 }
 
+export const removeComment = async (commentId: string, session: Session | null, postId: string) => {
+    try {
+        const response = await fetch(`${API_URL}deleteComment/${postId}/${commentId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + session?.accessToken
+            },
+        });
+
+        if (!response.ok) {
+            return new Error('Failed to remove comment');
+        }
+
+        return response
+    } catch (error) {
+        console.error('Error removing comment:', error);
+        throw error;
+    }
+}
+
+export const deletePost = async (postId: string, session: Session | null) => {
+    try {
+        const response = await fetch(`${API_URL}deletePost/${postId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + session?.accessToken
+            },
+        });
+
+        if (!response.ok) {
+            return new Error('Failed to delete post');
+        }
+
+        return response
+    }
+    catch (error) {
+        return error;
+    }
+}
+
+export const updatePost = async (postId: string, postContent: string, session: Session | null) => {
+    try{
+        const response = await fetch(`${API_URL}updatePost/${postId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + session?.accessToken
+            },
+            body: postContent,
+        });
+
+        if (!response.ok) {
+            return new Error('Failed to update post');
+        }
+
+        return response
+    }
+    catch (error) {
+        return error;
+    }
+}
+
+export const updateComment = async (postId: string, commentId: string, commentContent: string, session: Session | null) => {
+    try{
+        const response = await fetch(`${API_URL}updateComment/${postId}/${commentId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + session?.accessToken
+            },
+            body: commentContent,
+        });
+
+        if (!response.ok) {
+            return new Error('Failed to update comment');
+        }
+
+        return response
+    }
+    catch (error) {
+        return error;
+    }
+}
+
 
 
 

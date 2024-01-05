@@ -1,5 +1,14 @@
 import React, {useEffect, useState} from 'react';
-import {addLike, getUser, getUserName, isFriend, removeLike, isLiked} from '@/app/components/api';
+import {
+    addLike,
+    getUser,
+    getUserName,
+    isFriend,
+    removeLike,
+    isLiked,
+    deletePost,
+    updatePost
+} from '@/app/components/api';
 import {FoundUser, PostSectionProps} from '@/types/apiTypes';
 import CommentList from "@/app/profile/[slug]/CommentList";
 import LikeList from "@/app/profile/[slug]/LikeList";
@@ -7,7 +16,6 @@ import PostForm from "@/app/components/PostForm";
 import {useSession} from "next-auth/react";
 import {Session} from "next-auth";
 import Image from "next/image";
-
 
 const PostSection: React.FC<PostSectionProps> = ({posts, slug, refresh}) => {
     const [userProfileData, setUserProfileData] = useState<{ [key: string]: FoundUser }>({});
@@ -20,6 +28,7 @@ const PostSection: React.FC<PostSectionProps> = ({posts, slug, refresh}) => {
     const {data: session} = useSession();
     const [likedStatus, setLikedStatus] = useState<{ [key: string]: boolean }>({});
     const [hoveredPostId, setHoveredPostId] = useState<string | null>(null);
+    const [editPost, setEditPost] = useState("");
 
 
     useEffect(() => {
@@ -33,7 +42,7 @@ const PostSection: React.FC<PostSectionProps> = ({posts, slug, refresh}) => {
                 getUserName(post.userId).then(username => {
                     setUsernames(prevUsernames => ({...prevUsernames, [post.userId]: username}));
                 });
-                    // Fetch user data including profile picture
+
                 getUser(post.userId).then(userData => {
                     setUserProfileData(prevData => ({...prevData, [post.userId]: userData}));
                 });
@@ -117,6 +126,29 @@ const PostSection: React.FC<PostSectionProps> = ({posts, slug, refresh}) => {
         });
     }
 
+    const [editPostContent, setEditPostContent] = useState("");
+
+    const handleEditClick = (postId: string, content: string) => {
+        setEditPost(postId);
+        setEditPostContent(content);
+    };
+
+    const handleSaveEdit = async (postId: string, session: Session | null) => {
+        // Call your updatePost function here with postId and updated content
+        await updatePost(postId, editPostContent, session);
+
+        // Clear the edit state and refresh the posts
+        setEditPost("");
+        setEditPostContent("");
+        refresh();
+    };
+
+    const handleCancelEdit = () => {
+        // Clear the edit state
+        setEditPost("");
+        setEditPostContent("");
+    };
+
     return (
         <div className="flex flex-wrap justify-center w-full">
             <div
@@ -168,13 +200,37 @@ const PostSection: React.FC<PostSectionProps> = ({posts, slug, refresh}) => {
                                     </div>
                                     <p className="text-sm text-slate-600 uppercase ml-2 align mr-5">{post.date}</p>
                                 </div>
-                                <h4 className="text-[1.1em] leading-normal mb-2 text-slate-700">{post.content}</h4>
+                                {editPost !== post.id ? (
+                                    <h4 className="text-[1.1em] leading-normal mb-2 text-slate-700">{post.content}</h4>
+                                ) : (
+                                    <div className="w-full">
+                                        <textarea
+                                            value={editPostContent}
+                                            onChange={(e) => setEditPostContent(e.target.value)}
+                                            className="w-[98%] h-20 p-2 border rounded"
+                                        />
+                                        <div className="flex justify-end mr-5">
+                                        <button
+                                            className="text-lg text-slate-600 cursor-pointer mr-3"
+                                            onClick={() => handleSaveEdit(post.id, session)}
+                                        >
+                                            ✔️
+                                        </button>
+                                        <button
+                                            className="text-lg text-slate-600 cursor-pointer"
+                                            onClick={handleCancelEdit}
+                                        >
+                                            ❌
+                                        </button>
+                                        </div>
+                                    </div>
+                                )}
                                 <div className="flex flex-row items-center justify-between">
                                     <div>
                                         <button onClick={() => {
                                             likedStatus[post.id] ? handleUnlikeClick(post.id, session) : handleLikeClick(post.id, session)
                                         }}
-                                        className={`border p-1 rounded-full ${likedStatus[post.id] ? 'bg-violet-500' : 'bg-violet-100'}`}
+                                                className={`border p-1 rounded-full ${likedStatus[post.id] ? 'bg-violet-500' : 'bg-violet-100'}`}
                                         >
                                             👍
                                         </button>
@@ -194,12 +250,12 @@ const PostSection: React.FC<PostSectionProps> = ({posts, slug, refresh}) => {
                                         </button>
                                     </div>
                                     <div className={`mr-5 ${hoveredPostId === post.id ? 'visible' : 'hidden'}`}>
-                                        {session?.user?.id === post.userId && (
+                                        {session?.user?.id === post.userId && editPost !== post.id && (
                                             <>
                                                 <button
                                                     className="text-lg text-slate-600 cursor-pointer mr-3"
                                                     onClick={() => {
-                                                        alert('edit')
+                                                        handleEditClick(post.id, post.content);
                                                     }
                                                     }
                                                 >
@@ -208,7 +264,9 @@ const PostSection: React.FC<PostSectionProps> = ({posts, slug, refresh}) => {
                                                 <button
                                                     className="text-lg text-slate-600 cursor-pointer"
                                                     onClick={() => {
-                                                        alert('delete')
+                                                        deletePost(post.id, session).then(() => {
+                                                            refresh();
+                                                        });
                                                     }}
                                                 >
                                                     🗑️
