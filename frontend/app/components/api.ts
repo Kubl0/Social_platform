@@ -1,5 +1,5 @@
 import {Session} from "next-auth";
-import {Comment, EditUser, FoundUser, Post, Values, SendPost} from "@/types/apiTypes";
+import {Comment, EditUser, FoundUser, Post, SendPost, Values} from "@/types/apiTypes";
 
 const API_URL = 'http://localhost:8080/api/users/';
 
@@ -186,7 +186,7 @@ export async function addUser(values: Values) {
 
 export const addComment = async (postId: string, commentContent: string, session: Session | null) => {
     try {
-        const response = await fetch(`${API_URL}addComment/${postId}`, {
+        return await fetch(`${API_URL}addComment/${postId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -196,14 +196,7 @@ export const addComment = async (postId: string, commentContent: string, session
                 content: commentContent,
                 userId: session?.user?.id,
             }),
-        });
-
-        if (!response.ok) {
-            return new Error('Failed to add comment');
-        }
-
-        // Assuming the server returns the newly added comment
-        return await response.text();
+        })
     } catch (error) {
         console.error('Error adding comment:', error);
         return error;
@@ -542,20 +535,14 @@ export const updatePost = async (postId: string, postContent: string, session: S
 
 export const updateComment = async (postId: string, commentId: string, commentContent: string, session: Session | null) => {
     try{
-        const response = await fetch(`${API_URL}updateComment/${postId}/${commentId}`, {
+        return await fetch(`${API_URL}updateComment/${postId}/${commentId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + session?.accessToken
             },
-            body: commentContent,
-        });
-
-        if (!response.ok) {
-            return new Error('Failed to update comment');
-        }
-
-        return response
+            body: commentContent || '',
+        })
     }
     catch (error) {
         return error;

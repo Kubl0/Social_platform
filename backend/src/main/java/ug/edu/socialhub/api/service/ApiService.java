@@ -254,6 +254,10 @@ public class ApiService {
                 return new ResponseEntity<>("User not authorized", HttpStatus.UNAUTHORIZED);
             }
 
+            if(comment.getContent().isBlank()){
+                return new ResponseEntity<>("Comment content cannot be empty", HttpStatus.NOT_ACCEPTABLE);
+            }
+
             Optional<Post> post = postRepository.findById(id);
             if (post.isEmpty()) {
                 return new ResponseEntity<>("Post not found", HttpStatus.NOT_FOUND);
