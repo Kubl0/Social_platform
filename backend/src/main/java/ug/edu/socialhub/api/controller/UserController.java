@@ -23,8 +23,8 @@ public class UserController {
     }
 
     @GetMapping("/list")
-    public List<FoundUser> getAllUsers() {
-        return apiService.getAllUsers();
+    public List<FoundUser> getAllUsers(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+        return apiService.getAllUsers(authorizationHeader);
     }
 
     @PostMapping("/register")
@@ -69,8 +69,8 @@ public class UserController {
     }
 
     @GetMapping("/getAllPosts")
-    public List<Post> getAllPosts() {
-        return apiService.getAllPosts();
+    public List<Post> getAllPosts(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+        return apiService.getAllPosts(authorizationHeader);
     }
 
 
@@ -162,5 +162,10 @@ public class UserController {
     @PutMapping("/updateComment/{postId}/{commentId}")
     public ResponseEntity<String> updateComment(@PathVariable String postId, @PathVariable String commentId, @RequestBody String content, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
         return apiService.updateComment(postId, commentId, content, authorizationHeader);
+    }
+
+    @DeleteMapping("/removeUser/{id}")
+    public ResponseEntity<String> removeUser(@PathVariable String id, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+        return apiService.removeUser(id, authorizationHeader);
     }
 }

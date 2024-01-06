@@ -128,6 +128,18 @@ const CommentsComponent: React.FC<CommentsComponentProps> = ({postId, onClose, r
                                             </button>
                                         </div>
                                         )}
+                                    {session?.user?.type === "admin" && session?.user?.id !== comment.userId &&(
+                                        <button
+                                            className="text-sm text-slate-600 cursor-pointer"
+                                            onClick={() => {
+                                                removeComment(comment.id, session, postId).then(() => {
+                                                    setRefreshComments(!refreshComments)
+                                                });
+                                            }}
+                                        >
+                                            🗑️
+                                        </button>
+                                    )}
                                 </div>
                                     </>
                                 ) : (

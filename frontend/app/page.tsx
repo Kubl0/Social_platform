@@ -21,7 +21,6 @@ const Home: React.FC<{ params: { slug: string } }> = ({ params }) => {
     const [posts, setPosts] = useState<Post[]>([]);
     const [foundUser, setFoundUser] = useState<FoundUser | null>(null);
 
-
     useEffect(() => {
         async function fetchData() {
             try {

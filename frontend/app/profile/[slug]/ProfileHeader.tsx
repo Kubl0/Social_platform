@@ -3,6 +3,7 @@ import React from 'react';
 import Link from 'next/link';
 import {ProfileHeaderProps} from "@/types/apiTypes";
 import Image from "next/image";
+import {removeUser} from "@/app/components/api";
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({ foundUser, session, params }) => {
     return (
@@ -30,6 +31,22 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ foundUser, session, param
                                             <p className="emoji">✏️</p>
                                         </button>
                                     </Link>
+                                </div>
+                            )}
+                            {session && session?.user.id !== params.slug && session?.user?.type === "admin" && (
+                                <div className="absolute top-3 left-9">
+                                    <button
+                                        onClick={() => {
+                                            removeUser(foundUser?.id, session).then((r: any) => {
+                                                if(r.status === 200){
+                                                    alert("User banned")
+                                                    window.location.href = "/admin";
+                                                }
+                                            });
+                                        }}
+                                        className="group relative flex justify-center w-[40px] top-[100px] left-[100px] rounded-full border border-transparent bg-red-500 py-2 px-4 text-sm font-medium text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2">
+                                        <p className="emoji font-bold text-md">X</p>
+                                    </button>
                                 </div>
                             )}
                         </div>

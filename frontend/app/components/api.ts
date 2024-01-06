@@ -562,6 +562,72 @@ export const updateComment = async (postId: string, commentId: string, commentCo
     }
 }
 
+export const removeUser = async (userId: string | undefined, session: Session | null) => {
+    try {
+        const response = await fetch(`${API_URL}removeUser/${userId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + session?.accessToken
+            }
+        });
+
+        if (!response.ok) {
+            return new Error('Failed to remove user');
+        }
+        return response
+
+    } catch (error) {
+        return error;
+    }
+}
+
+export const getAllPosts = async (session: Session | null) => {
+    try {
+        const response = await fetch(`${API_URL}getAllPosts`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + session?.accessToken
+            },
+        });
 
 
 
+        let posts: Post[] = await response.json();
+
+        posts = posts.map((post: any) => {
+            post.date = new Date(Number(post.date)).toLocaleString([], {
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric',
+            });
+            return post;
+        });
+
+        return posts;
+    }
+    catch (error) {
+        console.error('Error fetching posts:', error);
+        throw error;
+    }
+}
+
+export const getAllUsers = async (session: Session | null) => {
+    try {
+        const response = await fetch(`${API_URL}list`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + session?.accessToken
+            },
+        });
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        throw error;
+    }
+}
