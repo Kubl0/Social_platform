@@ -23,7 +23,7 @@ public class UserManagementService {
     public static final String USER_UPDATE_FAILED = "User update failed";
     public static final String USER_NOT_FOUND = "User not found";
     public static final String USER_NOT_AUTHORIZED = "User not authorized";
-    public static final String FRIEND_ADDED_SUCCESFULLY = "Friend added succesfully";
+    public static final String FRIEND_ADDED_SUCCESSFULLY = "Friend added succesfully";
     public static final String FRIEND_NOT_FOUND = "Friend not found";
 
     private final UserRepository userRepository;
@@ -187,7 +187,7 @@ public class UserManagementService {
                     friend.get(0).removeFriendRequest(friendRequest.getId());
                     userRepository.save(user);
                     userRepository.save(friend.get(0));
-                    return new ResponseEntity<>(FRIEND_ADDED_SUCCESFULLY, HttpStatus.OK);
+                    return new ResponseEntity<>(FRIEND_ADDED_SUCCESSFULLY, HttpStatus.OK);
                 }
             }
 
@@ -202,7 +202,7 @@ public class UserManagementService {
             friend.get(0).addFriendRequest(friendRequest);
             userRepository.save(friend.get(0));
 
-            return new ResponseEntity<>(FRIEND_ADDED_SUCCESFULLY, HttpStatus.OK);
+            return new ResponseEntity<>(FRIEND_ADDED_SUCCESSFULLY, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("Friend add failed", HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -239,7 +239,7 @@ public class UserManagementService {
             assert friendUser.orElse(null) != null;
             userRepository.save(friendUser.orElse(null));
 
-            return new ResponseEntity<>(FRIEND_ADDED_SUCCESFULLY, HttpStatus.OK);
+            return new ResponseEntity<>(FRIEND_ADDED_SUCCESSFULLY, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("Friend add failed", HttpStatus.INTERNAL_SERVER_ERROR);
         }

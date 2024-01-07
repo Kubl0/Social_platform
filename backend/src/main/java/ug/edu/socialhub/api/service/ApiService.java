@@ -13,9 +13,11 @@ import java.util.List;
 @Service
 public class ApiService {
     private final ChatRepository chatRepository;
+    private final AuthenticationService authenticationService;
 
-    public ApiService(ChatRepository chatRepository) {
+    public ApiService(ChatRepository chatRepository, AuthenticationService authenticationService) {
         this.chatRepository = chatRepository;
+        this.authenticationService = authenticationService;
     }
 
 
@@ -41,7 +43,7 @@ public class ApiService {
 
     public ResponseEntity<String> addChatMessage(String userId, String friendId, String message, String authorizationHeader) {
         try {
-            if (isAuthorized(userId, authorizationHeader)) {
+            if (authenticationService.isAuthorized(userId, authorizationHeader)) {
                 return new ResponseEntity<>("User not authorized", HttpStatus.UNAUTHORIZED);
             }
 
