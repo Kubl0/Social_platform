@@ -1,10 +1,10 @@
-import React, {useEffect, useState} from 'react';
-import {addComment, getComments, getUser, removeComment, updateComment} from '@/app/components/api';
-import {Comment, FoundUser} from '@/types/apiTypes';
-import {Field, Form, Formik, FormikHelpers} from "formik";
-import {useSession} from "next-auth/react";
-import Image from "next/image";
-import {Session} from "next-auth";
+import React, { useEffect, useState } from 'react';
+import { addComment, getComments, getUser, removeComment, updateComment } from '@/app/components/api';
+import { Comment, FoundUser } from '@/types/apiTypes';
+import {Field, Form, Formik, FormikHelpers} from 'formik';
+import { useSession } from 'next-auth/react';
+import Image from 'next/image';
+import { Session } from 'next-auth';
 
 interface CommentsComponentProps {
     postId: string;
@@ -12,62 +12,79 @@ interface CommentsComponentProps {
     refresh: () => void;
 }
 
-const CommentsComponent: React.FC<CommentsComponentProps> = ({postId, onClose, refresh}) => {
-    const {data: session} = useSession();
+const CommentsComponent: React.FC<CommentsComponentProps> = ({ postId, onClose, refresh }) => {
+    const { data: session } = useSession();
     const [comments, setComments] = useState<Comment[]>([]);
     const [commentUserData, setCommentUserData] = useState<{ [key: string]: FoundUser }>({});
     const [refreshComments, setRefreshComments] = useState(false);
-    const [editComment, setEditComment] = useState("")
+    const [editComment, setEditComment] = useState('');
+    const [editPostContent, setEditPostContent] = useState('');
+    const [error, setError] = useState<string | null>(null);
+    const [editError, setEditError] = useState<string | null>(null);
 
     useEffect(() => {
         getComments(postId).then((fetchedComments) => {
             setComments(fetchedComments);
-            const userDataPromises = fetchedComments.map(comment =>
-                getUser(comment.userId).then(user => ({userId: comment.userId, user}))
+            const userDataPromises = fetchedComments.map((comment) =>
+                getUser(comment.userId).then((user) => ({ userId: comment.userId, user }))
             );
 
             // Wait for all promises to resolve
-            Promise.all(userDataPromises).then(usersData => {
-                const userMap = Object.fromEntries(usersData.map(({userId, user}) => [userId, user]));
+            Promise.all(userDataPromises).then((usersData) => {
+                const userMap = Object.fromEntries(usersData.map(({ userId, user }) => [userId, user]));
                 setCommentUserData(userMap);
             });
         });
     }, [postId, refreshComments]);
 
-    const handleNewCommentSubmit = async (values: { newComment: string }, {resetForm}: FormikHelpers<{
-        newComment: string
-    }>) => {
-        await addComment(postId, values.newComment, session);
 
-        const updatedComments = await getComments(postId);
-        setComments(updatedComments);
-        refresh();
-        setRefreshComments(!refreshComments);
-        resetForm();
+    const handleNewCommentSubmit = async (
+        values: { newComment: string },
+        { resetForm }: FormikHelpers<{ newComment: string }>
+    ) => {
+        await addComment(postId, values.newComment, session).then(async (r: any) => {
+            if (r.status === 200) {
+                resetForm();
+                setRefreshComments(!refreshComments);
+                refresh();
+                setError(null)
+            } else {
+                setError(await r.text())
+            }
+        });
     };
-
-    const [editPostContent, setEditPostContent] = useState("");
 
     const handleEditClick = (postId: string, content: string) => {
         setEditComment(postId);
         setEditPostContent(content);
     };
 
-    const handleSaveEdit = async (postId: string, session: Session | null, commentId: string, editPostContent: string) => {
-        // Call your updatePost function here with postId and updated content
-        await updateComment(postId, commentId, editPostContent, session)
-
-        // Clear the edit state and refresh the posts
-        setEditComment("");
-        setEditPostContent("");
-        setRefreshComments(!refreshComments);
-        refresh();
+    const handleSaveEdit = async (
+        postId: string,
+        session: Session | null,
+        commentId: string,
+        editPostContent: string
+    ) => {
+        // Call your updateComment function here with postId, commentId, and updated content
+        await updateComment(postId, commentId, editPostContent, session).then(async (r: any) => {
+            if (r.status !== 200) {
+                setEditError("Comment must not be empty")
+            }
+            else {
+                setEditComment('');
+                setEditPostContent('');
+                setRefreshComments(!refreshComments);
+                refresh();
+            }
+        }
+        );
     };
 
     const handleCancelEdit = () => {
         // Clear the edit state
-        setEditComment("");
-        setEditPostContent("");
+        setEditComment('');
+        setEditPostContent('');
+        setEditError("");
     };
 
     return (
@@ -78,7 +95,8 @@ const CommentsComponent: React.FC<CommentsComponentProps> = ({postId, onClose, r
                     <button
                         className="px-4 mb-4 py-1 rounded-md border border-red-500 bg-red-500 text-white hover:bg-red-600 focus:outline-none focus:ring focus:border-red-700"
                         onClick={onClose}
-                    >Close
+                    >
+                        Close
                     </button>
                 </div>
                 {comments.map((comment) => (
@@ -88,49 +106,65 @@ const CommentsComponent: React.FC<CommentsComponentProps> = ({postId, onClose, r
                                 <div className="flex items-center">
                                     {/* Display user profile picture */}
                                     <Image
-                                        src={commentUserData[comment.userId]?.profilePicture ?? 'https://www.charitycomms.org.uk/wp-content/uploads/2019/02/placeholder-image-square.jpg'}
+                                        src={
+                                            commentUserData[comment.userId]?.profilePicture ??
+                                            'https://www.charitycomms.org.uk/wp-content/uploads/2019/02/placeholder-image-square.jpg'
+                                        }
                                         alt="Profile"
                                         className="rounded-full mr-2"
                                         width={25}
                                         height={25}
                                     />
                                     <span className="text-md font-semibold">
-                                {commentUserData[comment.userId]?.username}
-                                </span>
+                                        {commentUserData[comment.userId]?.username}
+                                    </span>
                                 </div>
                                 <span className="text-sm text-gray-500"> {comment.date}</span>
                             </div>
                             <div className="flex flex-row justify-between mt-2">
                                 {editComment !== comment.id ? (
                                     <>
-                                <span className="text-sm text-gray-500 "> {comment.content}</span>
-                                <div className="">
-                                    {session?.user?.id === comment.userId && (
-                                        <div className="mt-[-5px]">
-                                            <button
-                                                className="text-sm text-slate-600 cursor-pointer mr-3"
-                                                onClick={() => {
-                                                    handleEditClick(comment.id, comment.content);
-                                                }
-                                                }
-                                            >
-                                                ✏️
-                                            </button>
-                                            <button
-                                                className="text-sm text-slate-600 cursor-pointer"
-                                                onClick={() => {
-                                                    removeComment(comment.id, session, postId).then(() => {
-                                                        setRefreshComments(!refreshComments)
-                                                    });
-                                                }}
-                                            >
-                                                🗑️
-                                            </button>
+                                        <span className="text-sm text-gray-500 "> {comment.content}</span>
+                                        <div className="">
+                                            {session?.user?.id === comment.userId && (
+                                                <div className="mt-[-5px]">
+                                                    <button
+                                                        className="text-sm text-slate-600 cursor-pointer mr-3"
+                                                        onClick={() => {
+                                                            handleEditClick(comment.id, comment.content);
+                                                        }}
+                                                    >
+                                                        ✏️
+                                                    </button>
+                                                    <button
+                                                        className="text-sm text-slate-600 cursor-pointer"
+                                                        onClick={() => {
+                                                            removeComment(comment.id, session, postId).then(() => {
+                                                                setRefreshComments(!refreshComments);
+                                                            });
+                                                        }}
+                                                    >
+                                                        🗑️
+                                                    </button>
+                                                </div>
+                                            )}
+                                            {session?.user?.type === 'admin' &&
+                                                session?.user?.id !== comment.userId && (
+                                                    <button
+                                                        className="text-sm text-slate-600 cursor-pointer"
+                                                        onClick={() => {
+                                                            removeComment(comment.id, session, postId).then(() => {
+                                                                setRefreshComments(!refreshComments);
+                                                            });
+                                                        }}
+                                                    >
+                                                        🗑️
+                                                    </button>
+                                                )}
                                         </div>
-                                        )}
-                                </div>
                                     </>
                                 ) : (
+                                    <div className="flex flex-col w-full">
                                     <div className="flex flex-row w-full">
                                         <textarea
                                             value={editPostContent}
@@ -144,33 +178,40 @@ const CommentsComponent: React.FC<CommentsComponentProps> = ({postId, onClose, r
                                             ❌
                                         </button>
                                         <button
-                                            onClick={() => handleSaveEdit(postId, session, comment.id, editPostContent)}
+                                            onClick={() =>
+                                                handleSaveEdit(postId, session, comment.id, editPostContent)
+                                            }
                                             className="text-md text-slate-600 cursor-pointer w-0 relative left-[-27px]"
                                         >
                                             ✔️
                                         </button>
+                                    </div>
+                                    <div className={`text-red-500 text-sm w-[90%]`}>{editError}</div>
                                     </div>
                                 )}
                             </div>
                         </div>
                     </div>
                 ))}
-                <Formik
-                    initialValues={{newComment: ''}}
-                    onSubmit={handleNewCommentSubmit}
-                >
+                {/* Comment Form */}
+                <Formik initialValues={{ newComment: '' }} onSubmit={handleNewCommentSubmit}>
                     <Form className="mt-4">
                         <Field
                             type="text"
                             name="newComment"
                             placeholder="Add a new comment..."
-                            className="border p-2 w-full rounded-md"
+                            className={`border p-2 w-full rounded-md ${error ? 'border-red-500' : ''}`}
                         />
+                        <div className="flex flex-row">
+                            <div className="text-red-500 text-sm w-[90%]">{error}</div>
                         <div className="flex justify-end w-full mt-2">
-                            <button type="submit"
-                                    className="rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                            <button
+                                type="submit"
+                                className="rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                            >
                                 Add Comment
                             </button>
+                        </div>
                         </div>
                     </Form>
                 </Formik>

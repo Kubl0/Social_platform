@@ -4,6 +4,7 @@ package ug.edu.socialhub.api.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
 import ug.edu.socialhub.api.models.*;
 import ug.edu.socialhub.api.service.ApiService;
@@ -24,8 +25,8 @@ public class UserController {
     }
 
     @GetMapping("/list")
-    public List<FoundUser> getAllUsers() {
-        return apiService.getAllUsers();
+    public List<FoundUser> getAllUsers(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+        return apiService.getAllUsers(authorizationHeader);
     }
 
     @PostMapping("/register")
@@ -70,8 +71,8 @@ public class UserController {
     }
 
     @GetMapping("/getAllPosts")
-    public List<Post> getAllPosts() {
-        return apiService.getAllPosts();
+    public List<Post> getAllPosts(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+        return apiService.getAllPosts(authorizationHeader);
     }
 
 
@@ -165,6 +166,7 @@ public class UserController {
         return apiService.updateComment(postId, commentId, content, authorizationHeader);
     }
 
+
     @GetMapping("/getChatMessages/{userId}/{friendId}")
     public ResponseEntity<ArrayList<Message>> getChatMessages(@PathVariable String userId, @PathVariable String friendId) {
         return apiService.getChatMessages(userId, friendId);
@@ -175,5 +177,11 @@ public class UserController {
         return apiService.addChatMessage(userId, friendId, message);
     }
 
+
+
+    @DeleteMapping("/removeUser/{id}")
+    public ResponseEntity<String> removeUser(@PathVariable String id, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+        return apiService.removeUser(id, authorizationHeader);
+    }
 
 }

@@ -1,4 +1,5 @@
 import {Session} from "next-auth";
+
 import {Comment, EditUser, FoundUser, Post, Values, SendPost, Message} from "@/types/apiTypes";
 
 const API_URL = 'http://localhost:8080/api/users/';
@@ -186,7 +187,7 @@ export async function addUser(values: Values) {
 
 export const addComment = async (postId: string, commentContent: string, session: Session | null) => {
     try {
-        const response = await fetch(`${API_URL}addComment/${postId}`, {
+        return await fetch(`${API_URL}addComment/${postId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -196,14 +197,7 @@ export const addComment = async (postId: string, commentContent: string, session
                 content: commentContent,
                 userId: session?.user?.id,
             }),
-        });
-
-        if (!response.ok) {
-            return new Error('Failed to add comment');
-        }
-
-        // Assuming the server returns the newly added comment
-        return await response.text();
+        })
     } catch (error) {
         console.error('Error adding comment:', error);
         return error;
@@ -542,25 +536,40 @@ export const updatePost = async (postId: string, postContent: string, session: S
 
 export const updateComment = async (postId: string, commentId: string, commentContent: string, session: Session | null) => {
     try{
-        const response = await fetch(`${API_URL}updateComment/${postId}/${commentId}`, {
+        return await fetch(`${API_URL}updateComment/${postId}/${commentId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + session?.accessToken
             },
-            body: commentContent,
-        });
-
-        if (!response.ok) {
-            return new Error('Failed to update comment');
-        }
-
-        return response
+            body: commentContent || '',
+        })
     }
     catch (error) {
         return error;
     }
 }
+
+export const removeUser = async (userId: string | undefined, session: Session | null) => {
+    try {
+        const response = await fetch(`${API_URL}removeUser/${userId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + session?.accessToken
+            }
+        });
+
+        if (!response.ok) {
+            return new Error('Failed to remove user');
+        }
+        return response
+
+    } catch (error) {
+        return error;
+    }
+}
+
 
 export const getChatMessages = async (userId: string, friendId: string) => {
     try {
@@ -599,6 +608,52 @@ export const addChatMessage = async (userId: string, friendId: string, message: 
     }
 }
 
+export const getAllPosts = async (session: Session | null) => {
+    try {
+        const response = await fetch(`${API_URL}getAllPosts`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + session?.accessToken
+            },
+        });
 
 
 
+        let posts: Post[] = await response.json();
+
+        posts = posts.map((post: any) => {
+            post.date = new Date(Number(post.date)).toLocaleString([], {
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric',
+            });
+            return post;
+        });
+
+        return posts;
+    }
+    catch (error) {
+        console.error('Error fetching posts:', error);
+        throw error;
+    }
+}
+
+export const getAllUsers = async (session: Session | null) => {
+    try {
+        const response = await fetch(`${API_URL}list`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + session?.accessToken
+            },
+        });
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        throw error;
+    }
+}
