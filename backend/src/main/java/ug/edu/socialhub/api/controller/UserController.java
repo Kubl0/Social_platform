@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import ug.edu.socialhub.api.models.*;
 import ug.edu.socialhub.api.service.ApiService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:3000")
@@ -163,4 +164,16 @@ public class UserController {
     public ResponseEntity<String> updateComment(@PathVariable String postId, @PathVariable String commentId, @RequestBody String content, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
         return apiService.updateComment(postId, commentId, content, authorizationHeader);
     }
+
+    @GetMapping("/getChatMessages/{userId}/{friendId}")
+    public ResponseEntity<ArrayList<Message>> getChatMessages(@PathVariable String userId, @PathVariable String friendId) {
+        return apiService.getChatMessages(userId, friendId);
+    }
+
+    @PostMapping("/addChatMessage/{userId}/{friendId}")
+    public ResponseEntity<String> addChatMessage(@PathVariable String userId, @PathVariable String friendId, @RequestBody String message) {
+        return apiService.addChatMessage(userId, friendId, message);
+    }
+
+
 }
