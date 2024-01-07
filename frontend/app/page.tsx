@@ -9,7 +9,7 @@ import {FoundUser, Post} from "@/types/apiTypes";
 import {getUser, getAllFriendsPosts} from "@/app/components/api";
 import Link from "next/link";
 import FriendsPosts from "./homepageassets/FriendsPosts";
-
+import Chat from "./chat/page";
 
 
 const Home: React.FC<{ params: { slug: string } }> = ({ params }) => {
@@ -70,6 +70,12 @@ const Home: React.FC<{ params: { slug: string } }> = ({ params }) => {
             onMouseLeave={() => setIsHovered('')}>
                 Your, profile - <Link href={`/profile/${session.user?.id}`} className="hover:text-blue-700">{session.user?.username}</Link></button>
             </div>
+            <div>
+              <button className={`p-4 rounded ${isHovered === 'chat' ? 'bg-violet-100' : ""} flex gap-2`}
+            onMouseEnter={() => setIsHovered('chat')}
+            onMouseLeave={() => setIsHovered('')}>
+               <Link href={`/chat`} className="hover:text-blue-700">Messages</Link></button>
+                </div>
           </div>
     
           {/* Middle Content */}

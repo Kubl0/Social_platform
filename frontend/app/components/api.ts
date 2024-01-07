@@ -1,5 +1,6 @@
 import {Session} from "next-auth";
-import {Comment, EditUser, FoundUser, Post, SendPost, Values} from "@/types/apiTypes";
+
+import {Comment, EditUser, FoundUser, Post, Values, SendPost, Message} from "@/types/apiTypes";
 
 const API_URL = 'http://localhost:8080/api/users/';
 
@@ -566,6 +567,44 @@ export const removeUser = async (userId: string | undefined, session: Session | 
 
     } catch (error) {
         return error;
+    }
+}
+
+
+export const getChatMessages = async (userId: string, friendId: string) => {
+    try {
+        const response = await fetch(`${API_URL}getChatMessages/${userId}/${friendId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching chat messages:', error);
+        throw error;
+    }
+}
+
+export const addChatMessage = async (userId: string, friendId: string, message: String) => {
+    try {
+        const response = await fetch(`${API_URL}addChatMessage/${userId}/${friendId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(message),
+        });
+
+        if (!response.ok) {
+            return new Error('Failed to add chat message');
+        }
+
+        return response
+    } catch (error) {
+        console.error('Error adding chat message:', error);
+        throw error;
     }
 }
 

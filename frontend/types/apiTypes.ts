@@ -16,6 +16,21 @@ export interface FoundUser {
     friends: string[];
 }
 
+export interface Message {
+    id: string;
+    senderId: string;
+    receiverId: string;
+    content: string;
+    date: string;
+}
+
+export interface Conversation {
+    id: string;
+    userId: string;
+    friendId: string;
+    messages: Message[] | null;
+}
+
 export interface FriendRequest {
     id: string;
     senderId: string;
