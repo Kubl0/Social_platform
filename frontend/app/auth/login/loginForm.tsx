@@ -1,14 +1,8 @@
-// LoginForm.tsx
 import {Form, Formik, Field, FormikHelpers} from 'formik';
 import {signIn} from 'next-auth/react';
-import {LoginValues} from '@/types/apiTypes';
+import {LoginFormProps, LoginValues} from '@/types/apiTypes';
 import Link from "next/link";
-import React, {Dispatch, SetStateAction} from "react";
-
-interface LoginFormProps {
-    setMessage: Dispatch<SetStateAction<{ type: string, content: string }>>;
-}
-
+import React from "react";
 
 export default function LoginForm({ setMessage }: Readonly<LoginFormProps>) {
     const handleSubmit = async (values: LoginValues, { setSubmitting }: FormikHelpers<LoginValues>) => {
@@ -42,7 +36,6 @@ export default function LoginForm({ setMessage }: Readonly<LoginFormProps>) {
 
     return (
         <Formik initialValues={{ username: "", password: "" }} onSubmit={handleSubmit}>
-            {({ touched, errors }) => (
                 <Form className="mt-8 space-y-6">
                     <div className="flex flex-col">
                         <div className="flex flex-row">
@@ -53,11 +46,6 @@ export default function LoginForm({ setMessage }: Readonly<LoginFormProps>) {
                                 type="text"
                                 placeholder="Username"
                             />
-                            {touched.username && errors.username && (
-                                <span className="error-indicator" data-tooltip={errors.username}>
-              !
-            </span>
-                            )}
                         </div>
 
                         <div className="flex flex-row">
@@ -68,11 +56,6 @@ export default function LoginForm({ setMessage }: Readonly<LoginFormProps>) {
                                 type="password"
                                 placeholder="Password"
                             />
-                            {touched.password && errors.password && (
-                                <span className="error-indicator" data-tooltip={errors.password}>
-              !
-            </span>
-                            )}
                         </div>
                     </div>
 
@@ -107,7 +90,6 @@ export default function LoginForm({ setMessage }: Readonly<LoginFormProps>) {
                         </Link>
                     </p>
                 </Form>
-            )}
         </Formik>
 );
 }

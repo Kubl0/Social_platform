@@ -1,6 +1,6 @@
 import {Session} from "next-auth";
 
-import {Comment, EditUser, FoundUser, Post, Values, SendPost, Message} from "@/types/apiTypes";
+import {Comment, EditUser, FoundUser, Post, Values, SendPost} from "@/types/apiTypes";
 
 const API_URL = 'http://localhost:8080/api/users/';
 
@@ -587,7 +587,7 @@ export const getChatMessages = async (userId: string, friendId: string) => {
     }
 }
 
-export const addChatMessage = async (userId: string, friendId: string, message: String) => {
+export const addChatMessage = async (userId: string, friendId: string, message: string) => {
     try {
         const response = await fetch(`${API_URL}addChatMessage/${userId}/${friendId}`, {
             method: 'POST',

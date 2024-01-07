@@ -1,23 +1,57 @@
 package ug.edu.socialhub.api.models;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class FoundUser {
 
-    private String id = null;
-    private String email = null;
-    private String username = null;
-    private String profilePicture = null;
+    private String id;
+    private String email;
+    private String username;
+    private String profilePicture;
+    private String description;
+    private List<String> friends;
 
-    private ArrayList<String> friends = null;
+    public FoundUser(String email, String username, String profilePicture, String description, String id, List<String> friends) {
+        this.email = email;
+        this.username = username;
+        this.profilePicture = profilePicture;
+        this.description = description;
+        this.id = id;
+        this.friends = friends != null ? friends : new ArrayList<>();
+    }
+
+    public FoundUser() {
+        this.friends = new ArrayList<>();
+    }
+
+    // Getters
+
+    public String getId() {
+        return id;
+    }
 
     public String getEmail() {
         return email;
     }
 
-    public String getId() {
-        return id;
+    public String getUsername() {
+        return username;
     }
+
+    public String getProfilePicture() {
+        return profilePicture;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public List<String> getFriends() {
+        return friends;
+    }
+
+    // Setters
 
     public void setId(String id) {
         this.id = id;
@@ -27,61 +61,30 @@ public class FoundUser {
         this.email = email;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
     public void setUsername(String username) {
         this.username = username;
-    }
-
-    public String getProfilePicture() {
-        return profilePicture;
     }
 
     public void setProfilePicture(String profilePicture) {
         this.profilePicture = profilePicture;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
     public void setDescription(String description) {
         this.description = description;
     }
 
-    String description = null;
-
-    public FoundUser(String email, String username, String profilePicture, String description, String id, ArrayList<String> friends){
-        this.email = email;
-        this.username = username;
-        this.profilePicture = profilePicture;
-        this.description = description;
-        this.id = id;
-        this.friends = friends;
-    }
-
-    public FoundUser() {
-        this.friends = new ArrayList<>();
+    public void setFriends(List<String> friends) {
+        this.friends = friends != null ? friends : new ArrayList<>();
     }
 
     @Override
     public String toString() {
-        return "{" +
+        return "FoundUser{" +
                 "id='" + id + '\'' +
                 ", email='" + email + '\'' +
                 ", username='" + username + '\'' +
                 ", profilePicture='" + profilePicture + '\'' +
                 ", description='" + description + '\'' +
                 '}';
-    }
-
-    public ArrayList<String> getFriends() {
-        return friends;
-    }
-
-    public void setFriends(ArrayList<String> friends) {
-        this.friends = friends;
     }
 }
