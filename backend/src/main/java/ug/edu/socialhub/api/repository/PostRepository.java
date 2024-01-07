@@ -14,4 +14,8 @@ public interface PostRepository extends MongoRepository<Post, String>{
 
     @Query("{ 'wallId' : ?0 }")
     List<Post> findAllByWallId(String id);
+
+    @Query("{ 'id' : ?0 }")
+    List<Post> findAllByCommentsContaining(String id);
+
 }

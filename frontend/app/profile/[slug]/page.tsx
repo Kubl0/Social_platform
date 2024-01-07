@@ -26,6 +26,7 @@ const ProfilePage: React.FC<{ params: { slug: string } }> = ({ params }) => {
     const [foundUser, setFoundUser] = useState<FoundUser | null>(null);
     const [posts, setPosts] = useState<Post[]>([]);
     const [refresh, setRefresh] = useState(false);
+    const [error, setError] = useState("");
 
     useEffect(() => {
         async function fetchData() {
@@ -41,7 +42,7 @@ const ProfilePage: React.FC<{ params: { slug: string } }> = ({ params }) => {
                 // @ts-ignore
                 setPosts(friendPosts);
             } catch (error) {
-                console.error('Error fetching user:', error);
+                setError("Something went wrong. Please try again later.");
             }
 
         }
@@ -52,6 +53,19 @@ const ProfilePage: React.FC<{ params: { slug: string } }> = ({ params }) => {
         setRefresh(!refresh);
     }
 
+    if(slug == "undefined") {
+        window.location.href = "/";
+    }
+
+    if(error) {
+        return (
+            <div className="flex justify-center items-center h-screen mt-[-10%]">
+                <div className="border-2 border-red-400 text-white p-8 rounded-md shadow-lg">
+                    <h1 className="text-3xl font-bold text-center text-red-400">{error}</h1>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div>

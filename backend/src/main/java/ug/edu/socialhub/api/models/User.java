@@ -19,6 +19,7 @@ public class User {
     private ArrayList<String> friendsList;
     private ArrayList<FriendRequest> friendRequests;
 
+    private String type;
 
     public ArrayList<String> getPosts() {
         return posts;
@@ -57,6 +58,7 @@ public class User {
         this.posts = new ArrayList<>();
         this.friendsList = new ArrayList<>();
         this.friendRequests = new ArrayList<>();
+        this.type = "user";
     }
 
     public User(String email, String password, String name) {
@@ -66,6 +68,7 @@ public class User {
         this.posts = new ArrayList<>();
         this.friendsList = new ArrayList<>();
         this.friendRequests = new ArrayList<>();
+        this.type = "user";
     }
 
     public String getEmail() {
@@ -158,5 +161,21 @@ public class User {
 
     public void removePost(String id) {
         this.posts.remove(id);
+    }
+
+    public void setType(String admin) {
+        this.type = admin;
+    }
+
+    public String getType() {
+        return this.type;
+    }
+
+    public String[] getFriendRequestsIds() {
+        String[] ids = new String[this.friendRequests.size()];
+        for (int i = 0; i < this.friendRequests.size(); i++) {
+            ids[i] = this.friendRequests.get(i).getId();
+        }
+        return ids;
     }
 }

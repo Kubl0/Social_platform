@@ -200,7 +200,9 @@ const PostSection: React.FC<PostSectionProps> = ({posts, slug, refresh}) => {
                                             height={30}
                                         />
                                         <p className="text-xl text-slate-600 font-bold uppercase">
-                                            {wallUser[post.wallId] !== usernames[post.userId] && wallUser[post.wallId] !== undefined ? `${usernames[post.userId]} > ${wallUser[post.wallId]}` : usernames[post.userId]}
+                                            {wallUser[post.wallId] !== usernames[post.userId] && wallUser[post.wallId] !== undefined ? `<a href={\`/profile/${post.userId}\`} className="text-black hover:underline flex flex-row">${usernames[post.userId]}</a> > 
+                                            <a href={\`/profile/${post.wallId}\`} className="text-black hover:underline flex flex-row">${wallUser[post.wallId]}</a>` : <a href={`/profile/${post.userId}`} className="text-black hover:underline flex flex-row">{usernames[post.userId]}</a>
+                                            }
                                         </p>
                                     </div>
                                     <p className="text-sm text-slate-600 uppercase ml-2 align mr-5">{post.date}</p>
@@ -278,6 +280,18 @@ const PostSection: React.FC<PostSectionProps> = ({posts, slug, refresh}) => {
                                                 </button>
 
                                             </>
+                                        )}
+                                        {session?.user?.type === 'admin' && session?.user?.id !== post.userId && (
+                                            <button
+                                                className="text-lg text-slate-600 cursor-pointer"
+                                                onClick={() => {
+                                                    deletePost(post.id, session).then(() => {
+                                                        refresh();
+                                                    });
+                                                }}
+                                            >
+                                                🗑️
+                                            </button>
                                         )}
                                     </div>
                                 </div>

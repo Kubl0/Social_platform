@@ -1,8 +1,10 @@
 package ug.edu.socialhub.api.service;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -16,11 +18,13 @@ import org.springframework.beans.factory.annotation.Value;
 
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.security.Key;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -43,7 +47,25 @@ public class ApiService {
         this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
-    public List<FoundUser> getAllUsers() {
+    @PostConstruct
+    private void insertInitialAdmin() {
+        List<User> admins = userRepository.findByUsername("admin");
+        if (!admins.isEmpty()) {
+            return;
+        }
+        User admin = new User();
+        admin.setEmail("admin@admin.pl");
+        admin.setUsername("admin");
+        admin.setPassword(passwordEncoder.encode("admin"));
+        admin.setType("admin");
+        userRepository.save(admin);
+    }
+
+    public List<FoundUser> getAllUsers(String authorizationHeader) {
+        if(!isAdmin(extractUserIdFromToken(authorizationHeader))){
+            return Collections.emptyList();
+        }
+
         List<User> users = userRepository.findAll();
         List<FoundUser> foundUsers = new java.util.ArrayList<>();
         for (User user : users) {
@@ -210,7 +232,13 @@ public class ApiService {
         return user.map(value -> postRepository.findAllById(value.getPosts())).orElse(null);
     }
 
-    public List<Post> getAllPosts() {
+    public List<Post> getAllPosts(String authorizationHeader) {
+        if(!isAdmin(extractUserIdFromToken(authorizationHeader))){
+            return Collections.emptyList();
+        }
+
+        System.out.println("getAllPosts");
+
         return postRepository.findAll();
     }
 
@@ -229,6 +257,10 @@ public class ApiService {
 
             if (isAuthorized(comment.getUserId(), authorizationHeader)) {
                 return new ResponseEntity<>("User not authorized", HttpStatus.UNAUTHORIZED);
+            }
+
+            if(comment.getContent().isBlank()){
+                return new ResponseEntity<>("Comment content cannot be empty", HttpStatus.NOT_ACCEPTABLE);
             }
 
             Optional<Post> post = postRepository.findById(id);
@@ -567,7 +599,7 @@ public class ApiService {
                 return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
             }
 
-            if (isAuthorized(userId, authorizationHeader)) {
+            if (isAuthorized(userId, authorizationHeader) && !isAdmin(extractUserIdFromToken(authorizationHeader))){
                 return new ResponseEntity<>("User not authorized", HttpStatus.UNAUTHORIZED);
             }
 
@@ -580,8 +612,29 @@ public class ApiService {
         }
     }
 
+    public String extractUserIdFromToken(String authorizationHeader) {
+        try {
+            String token = extractToken(authorizationHeader);
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(SECRET_KEY)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            return claims.getSubject(); // This should contain the user ID
+        } catch (Exception e) {
+            return null; // Handle the exception or return an appropriate value based on your needs
+        }
+    }
+
+    public boolean isAdmin(String id) {
+        Optional<User> user = userRepository.findById(id);
+        return user.map(value -> value.getType().equals("admin")).orElse(false);
+    }
+
     public ResponseEntity<String> deletePost(String id, String authorizationHeader) {
         try {
+
             Optional<Post> post = postRepository.findById(id);
             Post postToDelete = post.get();
 
@@ -591,7 +644,7 @@ public class ApiService {
             }
             User user = postUser.get();
 
-            if (isAuthorized(user.getId(), authorizationHeader)) {
+            if (isAuthorized(user.getId(), authorizationHeader) && !isAdmin(extractUserIdFromToken(authorizationHeader))){
                 return new ResponseEntity<>("User not authorized", HttpStatus.UNAUTHORIZED);
             }
 
@@ -715,6 +768,65 @@ public class ApiService {
         }
     }
 
+
+
+    public ResponseEntity<String> removeUser(String id, String authorizationHeader) {
+        try {
+            Optional<User> user = userRepository.findById(id);
+            if (user.isEmpty()) {
+                return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+            }
+
+            if (isAuthorized(id, authorizationHeader) && !isAdmin(extractUserIdFromToken(authorizationHeader))){
+                return new ResponseEntity<>("User not authorized", HttpStatus.UNAUTHORIZED);
+            }
+
+            if(extractUserIdFromToken(authorizationHeader).equals(id)){
+                return new ResponseEntity<>("User not authorized", HttpStatus.UNAUTHORIZED);
+            }
+
+            User userToDelete = user.get();
+
+            for (String friendId : userToDelete.getFriendsList()) {
+                Optional<User> friendUser = userRepository.findById(friendId);
+                if (friendUser.isPresent()) {
+                    friendUser.get().removeFriend(id);
+                    userRepository.save(friendUser.get());
+                }
+            }
+
+            for (String friendId : userToDelete.getFriendRequestsIds()) {
+                Optional<User> friendUser = userRepository.findById(friendId);
+                if (friendUser.isPresent()) {
+                    friendUser.get().removeFriendRequest(id);
+                    userRepository.save(friendUser.get());
+                }
+            }
+
+            List<Post> allPosts = postRepository.findAll();
+            for (Post post : allPosts) {
+                List<Comment> commentsToRemove = post.getComments().stream()
+                        .filter(comment -> comment.getUserId().equals(id))
+                        .collect(Collectors.toList());
+
+                for (Comment comment : commentsToRemove) {
+                    post.removeComment(comment);
+                }
+                postRepository.save(post);
+            }
+
+            for (String postId : userToDelete.getPosts()) {
+                Optional<Post> post = postRepository.findById(postId);
+                post.ifPresent(postRepository::delete);
+            }
+
+            userRepository.delete(userToDelete);
+
+            return new ResponseEntity<>("User deleted successfully", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("User delete failed", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
 }
 
