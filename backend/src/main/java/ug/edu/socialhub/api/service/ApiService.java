@@ -727,6 +727,7 @@ public class ApiService {
 
     public ResponseEntity<ArrayList<Message>> getChatMessages(String userId, String friendId) {
         try {
+
             List<Conversation> conversations = chatRepository.findByUsers(userId, friendId);
             Conversation conversation;
             if (conversations.isEmpty()) {
@@ -744,10 +745,15 @@ public class ApiService {
         }
     }
 
-    public ResponseEntity<String> addChatMessage(String userId, String friendId, String message) {
+    public ResponseEntity<String> addChatMessage(String userId, String friendId, String message, String authorizationHeader) {
         try {
+            if (isAuthorized(userId, authorizationHeader)) {
+                return new ResponseEntity<>("User not authorized", HttpStatus.UNAUTHORIZED);
+            }
+
             List<Conversation> conversations = chatRepository.findByUsers(userId, friendId);
             Conversation conversation;
+
             if (conversations.isEmpty()) {
                 System.out.println("No existing conversation found. Creating a new one.");
                 conversation = new Conversation(userId, friendId);

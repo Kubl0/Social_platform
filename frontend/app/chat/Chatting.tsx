@@ -90,7 +90,7 @@ const Chatting: React.FC<{ params: { slug: string }}> = () => {
 
           <div className='flex-1 flex flex-col'>
   {selectedFriend && (
-    <div className=' grid grid-rows-[5%,62%,30%] h-screen'>
+    <div className=' grid grid-rows-[5%,62%,33%] h-screen'>
       <div className="border-b flex ">
         <Image
           src={
@@ -104,11 +104,22 @@ const Chatting: React.FC<{ params: { slug: string }}> = () => {
         />
         <p className="mt-2.5 font-semibold">- <Link href={`/profile/${selectedFriend.id}`}>{selectedFriend.username}</Link></p>
       </div>
-      <div className="overflow-y-auto flex-1">
+      <div className="overflow-y-auto flex-1 ">
         {conversations.map((message) => (
-          <div key={message.id}>
-            <p>{message.senderId}</p>
-            <p>{message.content}</p>
+          <div key={message.id} className={`flex justify-${message.senderId === session?.user?.username ? 'end' : 'start'}`}>
+            {message.senderId !== session?.user?.username && <p><Image
+          src={
+            selectedFriend?.profilePicture ??
+            'https://www.charitycomms.org.uk/wp-content/uploads/2019/02/placeholder-image-square.jpg'
+          }
+          alt="profile picture"
+          className="rounded-full mr-3 mt-2 ml-2 mb-2"
+          width={30}
+          height={30}
+        /></p>}
+        <div className="rounded-lg bg-purple-100 p-2 mt-1 mb-1 mr-1">
+          <p>{message.content.replace(/["']/g, "")}</p>
+            </div>
           </div>
         ))}
       </div>
@@ -118,12 +129,6 @@ const Chatting: React.FC<{ params: { slug: string }}> = () => {
     </div>
   )}
 
-  {/* Bottom - Display ChatForm */}
-  {/* {selectedFriend && (
-    <div className='p-4 bg-purple-300 absolute bottom-0'>
-      <ChatForm userId={session!.user?.id} secondUser={selectedFriend.id} />
-    </div>
-  )} */}
 </div>
 
 
