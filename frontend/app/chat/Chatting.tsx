@@ -69,7 +69,7 @@ const Chatting: React.FC<{ params: { slug: string }}> = () => {
     return (
         <div className='flex w-screen'>
           {/* Left side - Display Friends List */}
-          <div className='p-4 border-r overflow-y-auto '>
+          <div className='p-4 h-screen overflow-y-auto  bg-purple-100'>
             <h2 className='text-lg font-semibold mb-4'>Friends</h2>
             <ul>
               {friends.map((friend) => (
@@ -90,7 +90,7 @@ const Chatting: React.FC<{ params: { slug: string }}> = () => {
 
           <div className='flex-1 flex flex-col'>
   {selectedFriend && (
-    <div className='p-4  flex flex-col h-[83%] '>
+    <div className=' grid grid-rows-[5%,62%,33%] h-screen'>
       <div className="border-b flex ">
         <Image
           src={
@@ -98,30 +98,37 @@ const Chatting: React.FC<{ params: { slug: string }}> = () => {
             'https://www.charitycomms.org.uk/wp-content/uploads/2019/02/placeholder-image-square.jpg'
           }
           alt="profile picture"
-          className="rounded-full mr-3"
-          width={40}
-          height={40}
+          className="rounded-full mr-3 mt-2 ml-2 mb-2"
+          width={30}
+          height={30}
         />
-        <p className="mt-1 font-semibold">- <Link href={`/profile/${selectedFriend.id}`}>{selectedFriend.username}</Link></p>
+        <p className="mt-2.5 font-semibold">- <Link href={`/profile/${selectedFriend.id}`}>{selectedFriend.username}</Link></p>
       </div>
-      <div className="overflow-y-auto flex-1">
+      <div className="overflow-y-auto flex-1 ">
         {conversations.map((message) => (
-          <div key={message.id}>
-            <p>{message.senderId}</p>
-            <p>{message.content}</p>
+          <div key={message.id} className={`flex justify-${message.senderId === session?.user?.username ? 'end' : 'start'}`}>
+            {message.senderId !== session?.user?.username && <p><Image
+          src={
+            selectedFriend?.profilePicture ??
+            'https://www.charitycomms.org.uk/wp-content/uploads/2019/02/placeholder-image-square.jpg'
+          }
+          alt="profile picture"
+          className="rounded-full mr-3 mt-2 ml-2 mb-2"
+          width={30}
+          height={30}
+        /></p>}
+        <div className="rounded-lg bg-purple-100 p-2 mt-1 mb-1 mr-1">
+          <p>{message.content.replace(/["']/g, "")}</p>
+            </div>
           </div>
         ))}
       </div>
-      
+      <div className='p-4 bg-purple-300'>
+        <ChatForm userId={session!.user?.id} secondUser={selectedFriend.id} />
+      </div>
     </div>
   )}
 
-  {/* Bottom - Display ChatForm */}
-  {selectedFriend && (
-    <div className='p-4 bg-purple-300 absolute bottom-0'>
-      <ChatForm userId={session!.user?.id} secondUser={selectedFriend.id} />
-    </div>
-  )}
 </div>
 
 

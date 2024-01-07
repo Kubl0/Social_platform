@@ -176,8 +176,8 @@ public class ApiController {
     }
 
     @PostMapping("/addChatMessage/{userId}/{friendId}")
-    public ResponseEntity<String> addChatMessage(@PathVariable String userId, @PathVariable String friendId, @RequestBody String message) {
-        return apiService.addChatMessage(userId, friendId, message);
+    public ResponseEntity<String> addChatMessage(@PathVariable String userId, @PathVariable String friendId, @RequestBody String message, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+        return apiService.addChatMessage(userId, friendId, message, authorizationHeader);
     }
 
     @DeleteMapping("/removeUser/{id}")

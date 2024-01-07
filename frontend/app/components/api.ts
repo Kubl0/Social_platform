@@ -587,12 +587,13 @@ export const getChatMessages = async (userId: string, friendId: string) => {
     }
 }
 
-export const addChatMessage = async (userId: string, friendId: string, message: string) => {
+export const addChatMessage = async (userId: string, friendId: string, message: String, session: Session | null) => {
     try {
         const response = await fetch(`${API_URL}addChatMessage/${userId}/${friendId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + session?.accessToken
             },
             body: JSON.stringify(message),
         });

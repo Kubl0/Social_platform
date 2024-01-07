@@ -22,7 +22,7 @@ const ChatForm: React.FC<ChatFormProps> = ({userId, secondUser}) => {
             message: Yup.string().required('Message is required'),
         }),
         onSubmit: (values) => {
-            addChatMessage(userId, secondUser, values.message).then((r) => {
+            addChatMessage(userId, secondUser, values.message, session).then((r) => {
                 formik.resetForm();
             });
         },
@@ -31,7 +31,7 @@ const ChatForm: React.FC<ChatFormProps> = ({userId, secondUser}) => {
     
     return (
         <form onSubmit={formik.handleSubmit}>
-          <div className="mb-4 w-full">
+          <div className="w-full">
             <label htmlFor="message" className="block text-sm font-medium text-gray-700">
               Message
             </label>
