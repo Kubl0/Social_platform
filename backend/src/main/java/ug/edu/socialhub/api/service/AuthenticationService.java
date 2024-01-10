@@ -37,7 +37,7 @@ public class AuthenticationService {
 
     public boolean isAdmin(String id) {
         Optional<User> user = userRepository.findById(id);
-        return user.map(value -> value.getType().equals("admin")).orElse(false);
+        return !user.map(value -> value.getType().equals("admin")).orElse(false);
     }
 
     public String extractToken(String authorizationHeader) {

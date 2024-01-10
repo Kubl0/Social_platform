@@ -337,18 +337,15 @@ public class UserManagementService {
     public ResponseEntity<String> removeUser(String id, String authorizationHeader) {
         try {
             Optional<User> user = userRepository.findById(id);
-            ResponseEntity<String> isUserAuthorized = isUserAuthorized(id, authorizationHeader);
-            if (isUserAuthorized != null) {
-                return isUserAuthorized;
-            }
-
-            if (authenticationService.extractUserIdFromToken(authorizationHeader).equals(id)) {
-                return new ResponseEntity<>(USER_NOT_AUTHORIZED, HttpStatus.UNAUTHORIZED);
-            }
-
             if (user.isEmpty()) {
                 return new ResponseEntity<>(USER_NOT_FOUND, HttpStatus.NOT_FOUND);
             }
+
+            if (authenticationService.isAdmin(authenticationService.extractUserIdFromToken(authorizationHeader))) {
+                return new ResponseEntity<>("Not authorized", HttpStatus.UNAUTHORIZED);
+            }
+            
+
             User userToDelete = user.get();
 
             for (String friendId : userToDelete.getFriendsList()) {

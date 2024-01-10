@@ -15,6 +15,7 @@ import CommentList from '@/app/components/CommentSection/CommentList';
 import LikeList from '@/app/components/PostSection/LikeList';
 import PostForm from '@/app/components/PostForm';
 import Image from 'next/image';
+import DOMPurify from "dompurify";
 
 const PostSection: React.FC<PostSectionProps> = ({ posts, slug, refresh }) => {
     const [userProfileData, setUserProfileData] = useState<{ [key: string]: FoundUser }>({});
@@ -166,15 +167,14 @@ const PostSection: React.FC<PostSectionProps> = ({ posts, slug, refresh }) => {
                                             height={30}
                                         />
                                         <p className="text-xl text-slate-600 font-bold uppercase">
-                                            {wallUser[post.wallId] !== usernames[post.userId] && wallUser[post.wallId] !== undefined ? `<a href={\`/profile/${post.userId}\`} className="text-black hover:underline flex flex-row">${usernames[post.userId]}</a> > 
-                                            <a href={\`/profile/${post.wallId}\`} className="text-black hover:underline flex flex-row">${wallUser[post.wallId]}</a>` : <a href={`/profile/${post.userId}`} className="text-black hover:underline flex flex-row">{usernames[post.userId]}</a>
+                                            {wallUser[post.wallId] !== usernames[post.userId] && wallUser[post.wallId] !== undefined ? <span className="flex flex-row"> <a href={`/profile/${post.userId}`} className="text-black hover:underline flex flex-row">{usernames[post.userId]}</a> &nbsp; &gt; &nbsp; <a href={`/profile/${post.wallId}`} className="text-black hover:underline flex flex-row">{wallUser[post.wallId]}</a> </span> : <a href={`/profile/${post.userId}`} className="text-black hover:underline flex flex-row">{usernames[post.userId]}</a>
                                             }
                                         </p>
                                     </div>
                                     <p className="text-sm text-slate-600 uppercase ml-2 align mr-5">{post.date}</p>
                                 </div>
                                 {editPost !== post.id ? (
-                                    <h4 className="text-[1.1em] leading-normal mb-2 text-slate-700">{post.content}</h4>
+                                    <h4 className="text-[1.1em] leading-normal mb-2 text-slate-700" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }} />
                                 ) : (
                                     <div className="w-full">
                                         <textarea

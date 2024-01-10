@@ -4,6 +4,7 @@ import Image from 'next/image';
 import {Comment, FoundUser} from '@/types/apiTypes';
 import {Session} from 'next-auth';
 import {CommentActions, CommentEdit} from "@/app/components/CommentSection/CommentActions";
+import DOMPurify from 'dompurify';
 
 
 interface CommentItemProps {
@@ -55,7 +56,10 @@ const CommentItem: React.FC<CommentItemProps> = ({
             <div className="flex flex-row justify-between mt-2">
                 {!isEditing ? (
                     <>
-                        <span className="text-sm text-gray-500 "> {comment.content}</span>
+                        <span
+                            className="text-sm text-gray-500"
+                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(comment.content) }}
+                        />
                         <CommentActions
                             comment={comment}
                             session={session}
