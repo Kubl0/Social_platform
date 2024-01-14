@@ -14,8 +14,8 @@ import {FoundUser, Post, PostSectionProps} from '@/types/apiTypes';
 import CommentList from '@/app/components/CommentSection/CommentList';
 import LikeList from '@/app/components/PostSection/LikeList';
 import PostForm from '@/app/components/PostForm';
-import Image from 'next/image';
 import DOMPurify from "dompurify";
+import Gravatar from "react-gravatar";
 
 const PostSection: React.FC<PostSectionProps> = ({ posts, slug, refresh }) => {
     const [userProfileData, setUserProfileData] = useState<{ [key: string]: FoundUser }>({});
@@ -159,13 +159,7 @@ const PostSection: React.FC<PostSectionProps> = ({ posts, slug, refresh }) => {
                                 <div className="flex flex-row items-center mb-2 justify-between">
                                     <div className="flex items-center">
                                         {/* Display user profile picture */}
-                                        <Image
-                                            src={userProfileData[post.userId]?.profilePicture ?? 'https://www.charitycomms.org.uk/wp-content/uploads/2019/02/placeholder-image-square.jpg'}
-                                            alt="Profile"
-                                            className="rounded-full mr-2"
-                                            width={30}
-                                            height={30}
-                                        />
+                                        <Gravatar email={userProfileData[post.userId]?.email} size={30} className="rounded-full mr-2"/>
                                         <p className="text-xl text-slate-600 font-bold uppercase">
                                             {wallUser[post.wallId] !== usernames[post.userId] && wallUser[post.wallId] !== undefined ? <span className="flex flex-row"> <a href={`/profile/${post.userId}`} className="text-black hover:underline flex flex-row">{usernames[post.userId]}</a> &nbsp; &gt; &nbsp; <a href={`/profile/${post.wallId}`} className="text-black hover:underline flex flex-row">{wallUser[post.wallId]}</a> </span> : <a href={`/profile/${post.userId}`} className="text-black hover:underline flex flex-row">{usernames[post.userId]}</a>
                                             }

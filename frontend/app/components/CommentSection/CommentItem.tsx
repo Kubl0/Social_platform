@@ -1,10 +1,10 @@
 // CommentItem.tsx
 import React from 'react';
-import Image from 'next/image';
 import {Comment, FoundUser} from '@/types/apiTypes';
 import {Session} from 'next-auth';
 import {CommentActions, CommentEdit} from "@/app/components/CommentSection/CommentActions";
 import DOMPurify from 'dompurify';
+import Gravatar from "react-gravatar";
 
 
 interface CommentItemProps {
@@ -39,16 +39,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
             <div className="flex justify-between">
                 <div className="flex items-center">
                     {/* Display user profile picture */}
-                    <Image
-                        src={
-                            userData.profilePicture ??
-                            'https://www.charitycomms.org.uk/wp-content/uploads/2019/02/placeholder-image-square.jpg'
-                        }
-                        alt="Profile"
-                        className="rounded-full mr-2"
-                        width={25}
-                        height={25}
-                    />
+                    <Gravatar email={userData.email} size={25} className="rounded-full mr-2"/>
                     <span className="text-md font-semibold">{userData.username}</span>
                 </div>
                 <span className="text-sm text-gray-500"> {comment.date}</span>

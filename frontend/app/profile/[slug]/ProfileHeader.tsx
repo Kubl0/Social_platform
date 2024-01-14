@@ -2,10 +2,11 @@
 import React from 'react';
 import Link from 'next/link';
 import {ProfileHeaderProps} from "@/types/apiTypes";
-import Image from "next/image";
 import {removeUser} from "@/app/components/api";
+import Gravatar from 'react-gravatar';
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({ foundUser, session, params }) => {
+
     return (
         <div className="px-6 mt-20 w-full">
             <div className="flex flex-wrap justify-center">
@@ -13,16 +14,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ foundUser, session, param
                     <div className="w-full flex justify-center">
                         <div className="relative">
                             <div className="mt-[-50px]">
-                                <Image
-                                    alt={foundUser?.username ?? 'User profile picture'}
-                                    src={
-                                        foundUser?.profilePicture ??
-                                        'https://www.charitycomms.org.uk/wp-content/uploads/2019/02/placeholder-image-square.jpg'
-                                    }
-                                    className="shadow-xl rounded-full align-middle border-none mx-auto max-w-[200px]"
-                                    width={200}
-                                    height={200}
-                                />
+                                <Gravatar email={foundUser?.email} size={200} className="shadow-xl rounded-full align-middle border-none mx-auto max-w-[200px]"/>
                             </div>
                             {session && session?.user.id === params.slug && (
                                 <div className="absolute top-3 left-9">

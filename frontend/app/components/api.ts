@@ -665,3 +665,31 @@ export const getAllUsers = async (session: Session | null) => {
         throw error;
     }
 }
+
+export const getPost = async(id: string) => {
+    try{
+        const response = await fetch(`${API_URL}postById/${id}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        const post = await response.json()
+        post.date = new Date(Number(post.date)).toLocaleString([], {
+            year: 'numeric',
+            month: 'numeric',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+        });
+
+        return post;
+
+
+    }
+    catch (error) {
+        console.error('Error fetching users:', error);
+        throw error;
+    }
+}

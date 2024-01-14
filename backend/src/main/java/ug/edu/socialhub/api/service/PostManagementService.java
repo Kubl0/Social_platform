@@ -68,6 +68,11 @@ public class PostManagementService {
         }
     }
 
+    public Post getPostById(String id) {
+        Optional<Post> post = postRepository.findById(id);
+        return post.orElse(null);
+    }
+
     public List<Post> getPosts(String id) {
         Optional<User> user = userRepository.findById(id);
         return user.map(value -> postRepository.findAllById(value.getPosts())).orElse(null);

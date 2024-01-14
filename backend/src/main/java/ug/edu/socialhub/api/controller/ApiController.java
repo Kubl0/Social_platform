@@ -39,6 +39,11 @@ public class ApiController {
         return userManagementService.getAllUsers(authorizationHeader);
     }
 
+    @GetMapping("/postById/{id}")
+    public Post getPostById(@PathVariable String id){
+        return postManagementService.getPostById(id);
+    }
+
     @PostMapping("/register")
     public ResponseEntity<String> addUser(@RequestBody UserDTO user) {
         return userManagementService.addUser(user);
