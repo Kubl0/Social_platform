@@ -114,7 +114,7 @@ const CommentsComponent: React.FC<CommentsComponentProps> = ({postId, onClose, r
                         <div className="flex flex-row items-center mb-2 justify-between">
                             <div className="flex items-center">
                                 {/* Display user profile picture */}
-                                <Gravatar email={postUser?.email} size={30} className="rounded-full mr-2"/>
+                                <Gravatar email={postUser?.email ? postUser?.email : ""} size={30} className="rounded-full mr-2"/>
                                 <p>{postUser?.username}</p>
                             </div>
                             <p className="text-sm text-slate-600 uppercase ml-2 align mr-5">{post?.date}</p>

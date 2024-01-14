@@ -14,7 +14,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ foundUser, session, param
                     <div className="w-full flex justify-center">
                         <div className="relative">
                             <div className="mt-[-50px]">
-                                <Gravatar email={foundUser?.email} size={200} className="shadow-xl rounded-full align-middle border-none mx-auto max-w-[200px]"/>
+                                <Gravatar email={foundUser?.email ? foundUser?.email : ""} size={200} className="shadow-xl rounded-full align-middle border-none mx-auto max-w-[200px]"/>
                             </div>
                             {session && session?.user.id === params.slug && (
                                 <div className="absolute top-3 left-9">

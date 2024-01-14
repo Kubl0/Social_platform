@@ -39,7 +39,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
             <div className="flex justify-between">
                 <div className="flex items-center">
                     {/* Display user profile picture */}
-                    <Gravatar email={userData.email} size={25} className="rounded-full mr-2"/>
+                    <Gravatar email={userData.email ? userData.email : ""} size={25} className="rounded-full mr-2"/>
                     <span className="text-md font-semibold">{userData.username}</span>
                 </div>
                 <span className="text-sm text-gray-500"> {comment.date}</span>

@@ -159,7 +159,7 @@ const PostSection: React.FC<PostSectionProps> = ({ posts, slug, refresh }) => {
                                 <div className="flex flex-row items-center mb-2 justify-between">
                                     <div className="flex items-center">
                                         {/* Display user profile picture */}
-                                        <Gravatar email={userProfileData[post.userId]?.email} size={30} className="rounded-full mr-2"/>
+                                        <Gravatar email={userProfileData[post.userId]?.email ? userProfileData[post.userId]?.email : ""} size={30} className="rounded-full mr-2"/>
                                         <p className="text-xl text-slate-600 font-bold uppercase">
                                             {wallUser[post.wallId] !== usernames[post.userId] && wallUser[post.wallId] !== undefined ? <span className="flex flex-row"> <a href={`/profile/${post.userId}`} className="text-black hover:underline flex flex-row">{usernames[post.userId]}</a> &nbsp; &gt; &nbsp; <a href={`/profile/${post.wallId}`} className="text-black hover:underline flex flex-row">{wallUser[post.wallId]}</a> </span> : <a href={`/profile/${post.userId}`} className="text-black hover:underline flex flex-row">{usernames[post.userId]}</a>
                                             }
