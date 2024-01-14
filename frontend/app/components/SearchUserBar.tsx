@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { FoundUser } from '@/types/apiTypes';
 import {searchUsers} from "@/app/components/api";
-import Image from "next/image";
+import Gravatar from "react-gravatar";
 
 const UserSearch = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -39,16 +39,7 @@ const UserSearch = () => {
                 {filteredUsers.map(user => (
                     <li key={user.id} className="mb-3 mt-5 ml-5">
                         <a href={`/profile/${user.id}`} className="text-black hover:underline flex flex-row">
-                            <Image
-                                alt={user?.username ?? 'User profile picture'}
-                                src={
-                                    user?.profilePicture ??
-                                    'https://www.charitycomms.org.uk/wp-content/uploads/2019/02/placeholder-image-square.jpg'
-                                }
-                                className="shadow-xl rounded-full mr-3"
-                                width={30}
-                                height={30}
-                            />
+                            <Gravatar email={user?.email ? user?.email : ""} size={30} className="shadow-xl rounded-full mr-3"/>
                             <p className="mt-1 font-bold">{user.username}</p>
                         </a>
                     </li>
