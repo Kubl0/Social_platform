@@ -4,7 +4,9 @@ package ug.edu.socialhub.api.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.*;
 import ug.edu.socialhub.api.models.*;
 import ug.edu.socialhub.api.service.ApiService;
@@ -183,5 +185,12 @@ public class UserController {
     public ResponseEntity<String> removeUser(@PathVariable String id, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
         return apiService.removeUser(id, authorizationHeader);
     }
+
+//    @MessageMapping("/private/{friendId}/{userId}")
+//    @SendTo("/topic/private/{friendId}")
+//    public Message sendPrivateMessage(@DestinationVariable String friendId, @PathVariable String userId, @RequestBody String message) {
+//
+//        return apiService.sendPrivateMessage(friendId, userId, message);
+//    }
 
 }

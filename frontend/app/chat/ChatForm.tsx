@@ -7,9 +7,11 @@ import { useSession } from 'next-auth/react';
 interface ChatFormProps {
     userId: string;
     secondUser: string;
+    // onSend: (message: string) => void;
+    onSend: () => void;
 }
 
-const ChatForm: React.FC<ChatFormProps> = ({userId, secondUser}) => {
+const ChatForm: React.FC<ChatFormProps> = ({userId, secondUser, onSend}) => {
     const {data: session} = useSession();
 
     const formik = useFormik({
@@ -22,6 +24,8 @@ const ChatForm: React.FC<ChatFormProps> = ({userId, secondUser}) => {
             message: Yup.string().required('Message is required'),
         }),
         onSubmit: (values) => {
+            // onSend(values.message);
+            onSend();
             addChatMessage(userId, secondUser, values.message, session).then((r) => {
                 formik.resetForm();
             });

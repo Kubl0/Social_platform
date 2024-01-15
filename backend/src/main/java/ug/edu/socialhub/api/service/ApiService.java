@@ -834,6 +834,21 @@ public class ApiService {
         }
     }
 
+//    public Message sendPrivateMessage(String friendId, String userId, String message) {
+//        try {
+//
+//            Message messageCreated = new Message(userId, friendId, message);
+////            conversation.addMessage(messageCreated);
+////            chatRepository.save(conversation);
+////            System.out.println("Message added successfully. Conversation: " + conversation);
+////            return new ResponseEntity<>("Message added successfully", HttpStatus.OK);
+//            return messageCreated;
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return null;
+//        }
+//    }
+
 }
 
 

@@ -6,20 +6,22 @@ import ChatForm from "./ChatForm";
 import { getUserName } from "@/app/components/api";
 import Image from "next/image";
 import Link from "next/link";
+import {io, Socket} from "socket.io-client";
 const Chatting: React.FC<{ params: { slug: string }}> = () => {
     const { data: session } = useSession();
     const [selectedFriend, setSelectedFriend] = useState<FoundUser | null>(null);
     const [conversations, setConversations] = useState<Message[]>([]);
     const [friends, setFriends] = useState<FoundUser[]>([]);
     const [friendNames, setFriendNames] = useState("");
+    const [tempCount, setTempCount] = useState(0);
+    // const [socket , setSocket] = useState<Socket | null>(null);
     
 
     useEffect(() => {
         async function fetchData() {
             try {
                 if (session?.user?.id) {
-
-
+                  
                     const user = await getUser(session?.user?.id);
                     setFriends(await getAllFriends(user.friends));
 
@@ -28,9 +30,17 @@ const Chatting: React.FC<{ params: { slug: string }}> = () => {
                 console.error('Error fetching user or friends:', error);
             }
         }
-
         fetchData();
-    }, [session?.user?.id]);
+        // const newSocket = io("http://localhost:8080/chat/ws")
+        // setSocket(newSocket);
+
+        // return () => {
+        //   if (newSocket) {
+        //     newSocket.close();
+        //   }
+        // }
+
+    }, [session?.user?.id, tempCount]);
 
     useEffect(() => {
       document.body.style.overflow = 'hidden';
@@ -38,6 +48,46 @@ const Chatting: React.FC<{ params: { slug: string }}> = () => {
         document.body.style.overflow = 'visible';
       };
     }, []);
+
+    // useEffect(() => {
+    //   if (socket) {
+    //     socket.on('newMessage', (message: Message) => {
+    //       setConversations((prev) => [...prev, message]);
+    //     });
+
+    //     socket.on(`topic/private/${session?.user?.id}`, (message: Message) => {
+    //       if (message.senderId === selectedFriend?.id) {
+    //         setConversations((prev) => [...prev, message]);
+    //       }
+    //   });
+
+    //   }
+    // }, [socket, selectedFriend?.id, session?.user?.id]);
+
+    // const handleSendMessage = async (message: string) => {
+    //   try {
+    //     if (socket && selectedFriend) {
+    //       const destination = `/api/users/private/${selectedFriend.id}`
+    //       socket.emit(destination, {
+    //         senderId: session!.user!.id,
+    //         receiverId: selectedFriend!.id,
+    //         content: message
+    //       });
+    //     }
+    //     const newMessage: Message = {
+    //       id: '',
+    //       senderId: session!.user!.id,
+    //       receiverId: selectedFriend!.id,
+    //       content: message,
+    //       date: new Date().toISOString(),
+    //     };
+    //     setConversations((prev) => [...prev, newMessage]);
+    //     }
+    //   catch (error) {
+    //     console.error('Error sending message:', error);
+
+    //   }
+    // }
     
 
     const handleFriendClick = async (friendId: string) => {
@@ -64,6 +114,30 @@ const Chatting: React.FC<{ params: { slug: string }}> = () => {
             console.error('Error fetching user:', error);
         }
     };
+
+    const formatMessageDate = (messageDate: string, prevMessageDate: string | null) => {
+        const currTime = parseInt(messageDate);
+        const prevTime = prevMessageDate ? parseInt(prevMessageDate) : 0;
+
+        if (!isNaN(currTime) && !isNaN(prevTime)) {
+          const timeDiff = (currTime - prevTime) / (1000 * 3600);
+
+          if (timeDiff > 1) {
+            return new Date(currTime).toLocaleString();
+          }
+        }
+        return null;
+    }
+
+    const handleTemporarySend = async () => {
+      setTempCount(tempCount + 1);
+      if (selectedFriend) {
+        setTimeout(async () => {
+          await handleFriendClick(selectedFriend.id);
+        }, 500)
+      }
+    }
+
 
 
     return (
@@ -105,7 +179,11 @@ const Chatting: React.FC<{ params: { slug: string }}> = () => {
         <p className="mt-2.5 font-semibold">- <Link href={`/profile/${selectedFriend.id}`}>{selectedFriend.username}</Link></p>
       </div>
       <div className="overflow-y-auto flex-1 ">
-        {conversations.map((message) => (
+        {conversations.map((message, index) => (
+          <div>
+          <div className="flex justify-center text-xs text-gray-500">
+          {formatMessageDate(message.date, index > 0 ? conversations[index - 1].date : null)}
+        </div>
           <div key={message.id} className={`flex justify-${message.senderId === session?.user?.username ? 'end' : 'start'}`}>
             {message.senderId !== session?.user?.username && <p><Image
           src={
@@ -117,14 +195,16 @@ const Chatting: React.FC<{ params: { slug: string }}> = () => {
           width={30}
           height={30}
         /></p>}
+        
         <div className="rounded-lg bg-purple-100 p-2 mt-1 mb-1 mr-1">
           <p>{message.content.replace(/["']/g, "")}</p>
             </div>
           </div>
+          </div>
         ))}
       </div>
       <div className='p-4 bg-purple-300'>
-        <ChatForm userId={session!.user?.id} secondUser={selectedFriend.id} />
+        <ChatForm userId={session!.user?.id} secondUser={selectedFriend.id} /*onSend={handleSendMessage} */ onSend={handleTemporarySend} />
       </div>
     </div>
   )}
