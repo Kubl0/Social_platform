@@ -1,4 +1,5 @@
 import {Session} from "next-auth";
+import {Dispatch, SetStateAction} from "react";
 
 export interface EditUser {
     username: string;
@@ -45,6 +46,9 @@ export interface ProfileHeaderProps {
     params: { slug: string };
 }
 
+export interface LoginFormProps {
+    setMessage: Dispatch<SetStateAction<{ type: string, content: string }>>;
+}
 export interface Post {
     id: string;
     content: string;

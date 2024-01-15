@@ -4,6 +4,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Document("posts")
 public class Post {
@@ -13,34 +14,29 @@ public class Post {
     private String userId;
     private String content;
     private String date;
-
-    public String getWallId() {
-        return wallId;
-    }
-
-    public void setWallId(String wallId) {
-        this.wallId = wallId;
-    }
-
     private String wallId;
-
-    private ArrayList<String> likes;
-    private ArrayList<Comment> comments;
+    private List<String> likes;
+    private List<Comment> comments;
 
     public Post() {
-        this.likes = new ArrayList<>();
-        this.comments = new ArrayList<>();
-        this.date = String.valueOf(System.currentTimeMillis());
+        generateDefaultValues();
     }
 
     public Post(String userId, String content, String wallId) {
+        generateDefaultValues();
         this.userId = userId;
         this.content = content;
         this.wallId = wallId;
-        this.date = String.valueOf(System.currentTimeMillis());
+    }
+
+    private void generateDefaultValues() {
         this.likes = new ArrayList<>();
         this.comments = new ArrayList<>();
+        this.id = String.valueOf(System.currentTimeMillis());
+        this.date = String.valueOf(System.currentTimeMillis());
     }
+
+    // Getters
 
     public String getId() {
         return id;
@@ -58,14 +54,23 @@ public class Post {
         return date;
     }
 
-    public ArrayList<String> getLikes() {
+    public String getWallId() {
+        return wallId;
+    }
+
+    public List<String> getLikes() {
         return likes;
     }
 
-    public ArrayList<Comment> getComments() {
+    public List<Comment> getComments() {
         return comments;
     }
 
+    // Setters
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public void setUserId(String userId) {
         this.userId = userId;
@@ -79,13 +84,19 @@ public class Post {
         this.date = date;
     }
 
-    public void setLikes(ArrayList<String> likes) {
+    public void setWallId(String wallId) {
+        this.wallId = wallId;
+    }
+
+    public void setLikes(List<String> likes) {
         this.likes = likes;
     }
 
-    public void setComments(ArrayList<Comment> comments) {
+    public void setComments(List<Comment> comments) {
         this.comments = comments;
     }
+
+    // Additional methods
 
     public void addLike(String userId) {
         this.likes.add(userId);
@@ -103,17 +114,17 @@ public class Post {
         this.comments.remove(comment);
     }
 
+
     @Override
     public String toString() {
-        return "{" +
+        return "Post{" +
                 "id='" + id + '\'' +
                 ", userId='" + userId + '\'' +
                 ", content='" + content + '\'' +
                 ", date='" + date + '\'' +
+                ", wallId='" + wallId + '\'' +
                 ", likes=" + likes +
                 ", comments=" + comments +
-                ", wallId='" + wallId + '\'' +
                 '}';
     }
-
 }

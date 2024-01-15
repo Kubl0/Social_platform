@@ -1,6 +1,6 @@
 import {Session} from "next-auth";
 
-import {Comment, EditUser, FoundUser, Post, Values, SendPost, Message} from "@/types/apiTypes";
+import {Comment, EditUser, FoundUser, Post, Values, SendPost} from "@/types/apiTypes";
 
 const API_URL = 'http://localhost:8080/api/users/';
 
@@ -35,16 +35,23 @@ export async function getUserEditData(setEditedUser: (arg0: EditUser) => void, s
 }
 
 export async function getUserName(userId: string) {
-    return fetch(`${API_URL}get/${userId}`, {
+    const response = await fetch(`${API_URL}get/${userId}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
         },
-    })
-        .then((response) => response.json())
-        .then((data) => {
+    });
+
+    if (response.ok) {
+        try {
+            const data = await response.json();
             return data.username;
-        });
+        } catch (error) {
+            return 'Unknown User';
+        }
+    } else {
+        return 'Unknown User';
+    }
 }
 
 export async function getPosts(slug: string): Promise<Post[]> {
@@ -587,7 +594,7 @@ export const getChatMessages = async (userId: string, friendId: string) => {
     }
 }
 
-export const addChatMessage = async (userId: string, friendId: string, message: String, session: Session | null) => {
+export const addChatMessage = async (userId: string, friendId: string, message: string, session: Session | null) => {
     try {
         const response = await fetch(`${API_URL}addChatMessage/${userId}/${friendId}`, {
             method: 'POST',
@@ -654,6 +661,34 @@ export const getAllUsers = async (session: Session | null) => {
 
         return await response.json();
     } catch (error) {
+        console.error('Error fetching users:', error);
+        throw error;
+    }
+}
+
+export const getPost = async(id: string) => {
+    try{
+        const response = await fetch(`${API_URL}postById/${id}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        const post = await response.json()
+        post.date = new Date(Number(post.date)).toLocaleString([], {
+            year: 'numeric',
+            month: 'numeric',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+        });
+
+        return post;
+
+
+    }
+    catch (error) {
         console.error('Error fetching users:', error);
         throw error;
     }

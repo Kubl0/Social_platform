@@ -5,7 +5,6 @@ import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 import ug.edu.socialhub.api.models.Conversation;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface ChatRepository extends MongoRepository<Conversation, String> {

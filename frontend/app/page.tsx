@@ -8,7 +8,7 @@ import FriendList from "./components/FriendList";
 import {FoundUser, Post} from "@/types/apiTypes";
 import {getUser, getAllFriendsPosts} from "@/app/components/api";
 import Link from "next/link";
-import FriendsPosts from "./homepageassets/FriendsPosts";
+import FriendsPosts from "./components/FriendsPosts";
 import Chat from "./chat/page";
 
 

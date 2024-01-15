@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {deleteFriend, getAllFriends} from "@/app/components/api";
-import Image from "next/image";
 import InvitePopup from "@/app/profile/[slug]/InvitePopup";
+import Gravatar from "react-gravatar";
 
 const FriendList: React.FC<{ slug: string; session: any; friends: string[] | undefined, refresh: () => void }> = ({ slug, session, friends, refresh }) => {
     const [friendList, setFriendList] = useState<any[]>([]);
@@ -63,16 +63,7 @@ const FriendList: React.FC<{ slug: string; session: any; friends: string[] | und
                                 <div className="flex">
                                     <div className="mb flex flex-row mb-5">
                                         <a href={`/profile/${friend.id}`} className="text-black hover:underline flex flex-row">
-                                        <Image
-                                            src={
-                                                friend?.profilePicture ??
-                                                'https://www.charitycomms.org.uk/wp-content/uploads/2019/02/placeholder-image-square.jpg'
-                                            }
-                                            alt="profile picture"
-                                            className="rounded-full mr-3"
-                                            width={40}
-                                            height={40}
-                                        />
+                                            <Gravatar email={friend?.email} size={40} className="rounded-full mr-3"/>
                                         <p className="w-[75%] font-bold text-lg mt-1">{friend.username}</p>
                                         </a>
                                         {hoveredFriend === friend.id && session?.user?.id === slug && (

@@ -13,16 +13,21 @@ public class Comment {
     private String date;
 
     public Comment() {
+        generateDefaultValues();
+    }
+
+    public Comment(String userId, String content) {
+        generateDefaultValues();
+        this.userId = userId;
+        this.content = content;
+    }
+
+    private void generateDefaultValues() {
         this.id = UUID.randomUUID().toString();
         this.date = String.valueOf(System.currentTimeMillis());
     }
 
-    public Comment(String userId, String content) {
-        this.id = UUID.randomUUID().toString();
-        this.userId = userId;
-        this.content = content;
-        this.date = String.valueOf(System.currentTimeMillis());
-    }
+    // Getters
 
     public String getId() {
         return id;
@@ -32,7 +37,6 @@ public class Comment {
         return userId;
     }
 
-
     public String getContent() {
         return content;
     }
@@ -41,6 +45,8 @@ public class Comment {
         return date;
     }
 
+    // Setters
+
     public void setId(String id) {
         this.id = id;
     }
@@ -48,7 +54,6 @@ public class Comment {
     public void setUserId(String userId) {
         this.userId = userId;
     }
-
 
     public void setContent(String content) {
         this.content = content;

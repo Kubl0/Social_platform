@@ -1,89 +1,68 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import {
     addLike,
+    deletePost,
     getUser,
     getUserName,
     isFriend,
-    removeLike,
     isLiked,
-    deletePost,
-    updatePost
+    removeLike,
+    updatePost,
 } from '@/app/components/api';
-import {FoundUser, PostSectionProps} from '@/types/apiTypes';
-import CommentList from "@/app/components/PostSection/CommentList";
-import LikeList from "@/app/components/PostSection/LikeList";
-import PostForm from "@/app/components/PostForm";
-import {useSession} from "next-auth/react";
-import {Session} from "next-auth";
-import Image from "next/image";
+import {FoundUser, Post, PostSectionProps} from '@/types/apiTypes';
+import CommentList from '@/app/components/CommentSection/CommentList';
+import LikeList from '@/app/components/PostSection/LikeList';
+import PostForm from '@/app/components/PostForm';
+import DOMPurify from "dompurify";
+import Gravatar from "react-gravatar";
 
-const PostSection: React.FC<PostSectionProps> = ({posts, slug, refresh}) => {
+const PostSection: React.FC<PostSectionProps> = ({ posts, slug, refresh }) => {
     const [userProfileData, setUserProfileData] = useState<{ [key: string]: FoundUser }>({});
     const [usernames, setUsernames] = useState<{ [key: string]: string }>({});
     const [selectedLike, setSelectedLike] = useState<string | null>(null);
     const [selectedComment, setSelectedComment] = useState<string | null>(null);
     const [isAddPostPopupOpen, setIsAddPostPopupOpen] = useState(false);
     const [isFriendCheck, setIsFriendCheck] = useState(false);
-    const {data: session} = useSession();
+    const { data: session } = useSession();
     const [likedStatus, setLikedStatus] = useState<{ [key: string]: boolean }>({});
     const [hoveredPostId, setHoveredPostId] = useState<string | null>(null);
-    const [editPost, setEditPost] = useState("");
+    const [editPost, setEditPost] = useState('');
     const [wallUser, setWallUser] = useState<{ [key: string]: string }>({});
+    const [editPostContent, setEditPostContent] = useState('');
 
     useEffect(() => {
+        async function initialProcessPosts(posts: Post[] | null) {
+            for (const post of posts ?? []) {
+                const username = await getUserName(post.userId);
+                setUsernames((prevUsernames) => ({ ...prevUsernames, [post.userId]: username }));
 
-        posts?.forEach(post => {
-            getUserName(post.userId).then(() => {
+                const userData = await getUser(post.userId);
+                setUserProfileData((prevData) => ({ ...prevData, [post.userId]: userData }));
 
-                getUserName(post.userId).then(username => {
-                    setUsernames(prevUsernames => ({...prevUsernames, [post.userId]: username}));
-                });
-
-                getUser(post.userId).then(userData => {
-                    setUserProfileData(prevData => ({...prevData, [post.userId]: userData}));
-                });
-
-                isLiked(post.id, session).then(isLiked => {
-                    setLikedStatus(prevLikedStatus => ({...prevLikedStatus, [post.id]: isLiked}));
-                });
-            });
-        });
-
-        posts?.forEach(post => {
-            if(post.wallId !== null && post.wallId !== post.userId) {
-            getUserName(post.wallId).then(username => {
-                setWallUser(prevUsernames => ({...prevUsernames, [post.wallId]: username}));
-            });
+                const isPostLiked = await isLiked(post.id, session);
+                setLikedStatus((prevLikedStatus) => ({ ...prevLikedStatus, [post.id]: isPostLiked }));
             }
-        });
+        }(initialProcessPosts(posts).then());
 
-
-        isFriend(slug, session?.user?.id).then(isFriend => {
-                setIsFriendCheck(isFriend);
+        async function processPosts(posts: Post[] | null) {
+            for (const post of posts ?? []) {
+                if (post.wallId !== null && post.wallId !== post.userId) {
+                    const wallUsername = await getUserName(post.wallId);
+                    setWallUser((prevUsernames) => ({...prevUsernames, [post.wallId]: wallUsername}));
+                }
             }
-        );
+        }(processPosts(posts).then());
 
+        isFriend(slug, session?.user?.id).then((friendStatus) => setIsFriendCheck(friendStatus));
     }, [slug, posts, session]);
 
-    const handleAddPostClick = () => {
-        setIsAddPostPopupOpen(true);
-    };
+    const handleAddPostClick = () => setIsAddPostPopupOpen(true);
 
     const handleCloseAddPostPopup = () => {
         setIsAddPostPopupOpen(false);
         refresh();
     };
-
-    const renderAddPostPopup = () => (
-        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white p-8 rounded-lg w-[40%]">
-                <h2 className="text-2xl font-semibold mb-4">Add Post</h2>
-                <div className="">
-                    <PostForm onClose={handleCloseAddPostPopup} wallId={slug}/>
-                </div>
-            </div>
-        </div>
-    );
 
     const handlePopupOpen = (postId: string, type: 'like' | 'comment') => {
         type === 'like' ? setSelectedLike(postId) : setSelectedComment(postId);
@@ -93,6 +72,38 @@ const PostSection: React.FC<PostSectionProps> = ({posts, slug, refresh}) => {
         setSelectedLike(null);
         setSelectedComment(null);
     };
+
+    const handleLikeClick = (id: string) => addLike(id, session).then(refresh);
+
+    const handleUnlikeClick = (id: string) => removeLike(id, session).then(refresh);
+
+    const handleEditClick = (postId: string, content: string) => {
+        setEditPost(postId);
+        setEditPostContent(content);
+    };
+
+    const handleSaveEdit = async (postId: string) => {
+        await updatePost(postId, editPostContent, session);
+        setEditPost('');
+        setEditPostContent('');
+        refresh();
+    };
+
+    const handleCancelEdit = () => {
+        setEditPost('');
+        setEditPostContent('');
+    };
+
+    const renderAddPostPopup = () => (
+        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center">
+            <div className="bg-white p-8 rounded-lg w-[40%]">
+                <h2 className="text-2xl font-semibold mb-4">Add Post</h2>
+                <div className="">
+                    <PostForm onClose={handleCloseAddPostPopup} wallId={slug} />
+                </div>
+            </div>
+        </div>
+    );
 
     const renderPopup = (title: string, content: React.ReactNode) => (
         <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center">
@@ -106,53 +117,9 @@ const PostSection: React.FC<PostSectionProps> = ({posts, slug, refresh}) => {
         </div>
     );
 
-    const renderCommentsComponent = () => selectedComment && (
-        <CommentList postId={selectedComment} refresh={refresh} onClose={() => {
-            setSelectedComment(null)
-        }}/>
-    );
+    const renderCommentsComponent = () => selectedComment && <CommentList postId={selectedComment} refresh={refresh} onClose={() => setSelectedComment(null)} />;
 
-    const renderLikesComponent = () => selectedLike && (
-        <LikeList postId={selectedLike} onClose={() => {
-            setSelectedLike(null)
-        }}/>
-    );
-
-
-    function handleLikeClick(id: string, session: Session | null) {
-        addLike(id, session).then(() => {
-            refresh();
-        });
-    }
-
-    function handleUnlikeClick(id: string, session: Session | null) {
-        removeLike(id, session).then(() => {
-            refresh();
-        });
-    }
-
-    const [editPostContent, setEditPostContent] = useState("");
-
-    const handleEditClick = (postId: string, content: string) => {
-        setEditPost(postId);
-        setEditPostContent(content);
-    };
-
-    const handleSaveEdit = async (postId: string, session: Session | null) => {
-        // Call your updatePost function here with postId and updated content
-        await updatePost(postId, editPostContent, session);
-
-        // Clear the edit state and refresh the posts
-        setEditPost("");
-        setEditPostContent("");
-        refresh();
-    };
-
-    const handleCancelEdit = () => {
-        // Clear the edit state
-        setEditPost("");
-        setEditPostContent("");
-    };
+    const renderLikesComponent = () => selectedLike && <LikeList postId={selectedLike} onClose={() => setSelectedLike(null)} />;
 
     return (
         <div className="flex flex-wrap justify-center w-full">
@@ -192,23 +159,16 @@ const PostSection: React.FC<PostSectionProps> = ({posts, slug, refresh}) => {
                                 <div className="flex flex-row items-center mb-2 justify-between">
                                     <div className="flex items-center">
                                         {/* Display user profile picture */}
-                                        <Image
-                                            src={userProfileData[post.userId]?.profilePicture ?? 'https://www.charitycomms.org.uk/wp-content/uploads/2019/02/placeholder-image-square.jpg'}
-                                            alt="Profile"
-                                            className="rounded-full mr-2"
-                                            width={30}
-                                            height={30}
-                                        />
+                                        <Gravatar email={userProfileData[post.userId]?.email ? userProfileData[post.userId]?.email : ""} size={30} className="rounded-full mr-2"/>
                                         <p className="text-xl text-slate-600 font-bold uppercase">
-                                            {wallUser[post.wallId] !== usernames[post.userId] && wallUser[post.wallId] !== undefined ? `<a href={\`/profile/${post.userId}\`} className="text-black hover:underline flex flex-row">${usernames[post.userId]}</a> > 
-                                            <a href={\`/profile/${post.wallId}\`} className="text-black hover:underline flex flex-row">${wallUser[post.wallId]}</a>` : <a href={`/profile/${post.userId}`} className="text-black hover:underline flex flex-row">{usernames[post.userId]}</a>
+                                            {wallUser[post.wallId] !== usernames[post.userId] && wallUser[post.wallId] !== undefined ? <span className="flex flex-row"> <a href={`/profile/${post.userId}`} className="text-black hover:underline flex flex-row">{usernames[post.userId]}</a> &nbsp; &gt; &nbsp; <a href={`/profile/${post.wallId}`} className="text-black hover:underline flex flex-row">{wallUser[post.wallId]}</a> </span> : <a href={`/profile/${post.userId}`} className="text-black hover:underline flex flex-row">{usernames[post.userId]}</a>
                                             }
                                         </p>
                                     </div>
                                     <p className="text-sm text-slate-600 uppercase ml-2 align mr-5">{post.date}</p>
                                 </div>
                                 {editPost !== post.id ? (
-                                    <h4 className="text-[1.1em] leading-normal mb-2 text-slate-700">{post.content}</h4>
+                                    <h4 className="text-[1.1em] leading-normal mb-2 text-slate-700" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }} />
                                 ) : (
                                     <div className="w-full">
                                         <textarea
@@ -219,7 +179,7 @@ const PostSection: React.FC<PostSectionProps> = ({posts, slug, refresh}) => {
                                         <div className="flex justify-end mr-5">
                                         <button
                                             className="text-lg text-slate-600 cursor-pointer mr-3"
-                                            onClick={() => handleSaveEdit(post.id, session)}
+                                            onClick={() => handleSaveEdit(post.id)}
                                         >
                                             ✔️
                                         </button>
@@ -235,7 +195,7 @@ const PostSection: React.FC<PostSectionProps> = ({posts, slug, refresh}) => {
                                 <div className="flex flex-row items-center justify-between">
                                     <div>
                                         <button onClick={() => {
-                                            likedStatus[post.id] ? handleUnlikeClick(post.id, session) : handleLikeClick(post.id, session)
+                                            likedStatus[post.id] ? handleUnlikeClick(post.id) : handleLikeClick(post.id)
                                         }}
                                                 className={`border p-1 rounded-full ${likedStatus[post.id] ? 'bg-violet-500' : 'bg-violet-100'}`}
                                         >

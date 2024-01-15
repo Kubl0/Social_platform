@@ -1,11 +1,19 @@
+// Login.tsx
 'use client';
 
 import { motion } from 'framer-motion';
 import LoginForm from '@/app/auth/login/loginForm';
-import {useState} from "react";
+import { useState } from 'react';
+
+interface MessageType {
+    type: string;
+    content: string;
+}
+
+const initialMessageState: MessageType = { type: '', content: '' };
 
 export default function Login() {
-    const [message, setMessage] = useState<{ type: string; content: string }>({ type: '', content: '' });
+    const [message, setMessage] = useState<MessageType>(initialMessageState);
 
     return (
         <div className="flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">

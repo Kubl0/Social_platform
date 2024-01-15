@@ -28,7 +28,7 @@ export default function Navbar() {
                     )}
                 </div>
 
-                <div className="mt-2 w-[20%] ml-20">
+                <div className="mt-2 w-[25%] ml-20">
                     <SearchUserBar/>
                 </div>
 

@@ -5,6 +5,7 @@ import {useEffect, useState} from "react";
 import {getAllPosts, getAllUsers} from "@/app/components/api";
 import PostSection from "@/app/components/PostSection/PostSection";
 import UserList from "@/app/components/UserList";
+import {redirect} from "next/navigation";
 
 export default function Admin() {
     const {data: session} = useSession();
@@ -33,8 +34,10 @@ export default function Admin() {
     }
 
     if(session?.user?.type !== "admin") {
-        window.location.href = "/";
+        redirect("/");
     }
+
+
 
     return (
         <div className="flex flex-row justify-between">
