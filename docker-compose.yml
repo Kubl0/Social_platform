@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  mongo:
+    container_name: mongo
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./data:/data/db
+
+  spring-boot:
+    container_name: spring-boot
+    build: backend/.
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongo
+    environment:
+      - SPRING_DATA_MONGODB_HOST=mongo
+      - SPRING_DATA_MONGODB_PORT=27017
+#
+  nextjs:
+    container_name: nextjs
+    build: frontend/.
+    ports:
+      - "3000:3000"
+    depends_on:
+      - spring-boot
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8080
+
+
+
+
